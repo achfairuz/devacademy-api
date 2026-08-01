@@ -1,0 +1,37 @@
+package bootstrap
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
+
+	"github.com/iyuz/devacademy-api/internal/config"
+	"github.com/iyuz/devacademy-api/internal/database"
+	"github.com/iyuz/devacademy-api/internal/handlers"
+	"github.com/iyuz/devacademy-api/internal/repositories/impl"
+	"github.com/iyuz/devacademy-api/internal/routes"
+	"github.com/iyuz/devacademy-api/internal/services"
+)
+
+type App struct {
+	DB     *gorm.DB
+	Redis  *redis.Client
+	Router *gin.Engine
+}
+
+func Init(cfg *config.Config) *App {
+	db := database.InitPostgres(cfg)
+	rdb := database.InitRedis(cfg)
+
+	userRepo := impl.NewUserRepository(db)
+	userService := services.NewUserService(userRepo, cfg.JWT.Secret, cfg.JWT.Expiry)
+	userHandler := handlers.NewUserHandler(userService)
+
+	router := routes.SetupRouter(cfg, &routes.Handler{User: userHandler})
+
+	return &App{
+		DB:     db,
+		Redis:  rdb,
+		Router: router,
+	}
+}

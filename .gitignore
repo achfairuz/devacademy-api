@@ -1,0 +1,19 @@
+# Binaries
+/server
+/bin/
+*.exe
+*.out
+
+# Env
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# Logs
+*.log
