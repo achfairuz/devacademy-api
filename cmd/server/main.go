@@ -9,6 +9,7 @@ import (
 	_ "github.com/iyuz/devacademy-api/docs"
 	"github.com/iyuz/devacademy-api/internal/bootstrap"
 	"github.com/iyuz/devacademy-api/internal/config"
+	"github.com/iyuz/devacademy-api/internal/database"
 )
 
 // @title			DevAcademy API
@@ -23,6 +24,10 @@ func main() {
 	cfg := config.Load()
 
 	app := bootstrap.Init(cfg)
+
+	if err := database.SeedUsers(app.DB); err != nil {
+		log.Fatalf("failed to seed users: %v", err)
+	}
 
 	app.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
