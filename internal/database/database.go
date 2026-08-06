@@ -33,7 +33,26 @@ func InitPostgres(cfg *config.Config) *gorm.DB {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	if viper.GetBool("DB_AUTOMIGRATE") {
-		if err := db.AutoMigrate(&models.User{}); err != nil {
+		if err := db.AutoMigrate(
+			&models.User{},
+			&models.Category{},
+			&models.Course{},
+			&models.CourseSection{},
+			&models.Lesson{},
+			&models.LessonFile{},
+			&models.Enrollment{},
+			&models.LessonProgress{},
+			&models.Quiz{},
+			&models.QuizQuestion{},
+			&models.QuizOption{},
+			&models.QuizAttempt{},
+			&models.Assignment{},
+			&models.AssignmentSubmission{},
+			&models.SubscriptionPlan{},
+			&models.UserSubscription{},
+			&models.Payment{},
+			&models.Certificate{},
+		); err != nil {
 			log.Fatalf("failed to run migration: %v", err)
 		}
 	}

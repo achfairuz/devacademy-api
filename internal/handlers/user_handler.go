@@ -20,7 +20,8 @@ func NewUserHandler(service services.UserService) *UserHandler {
 }
 
 type registerRequest struct {
-	Name     string `json:"name" binding:"required"`
+	FullName string `json:"full_name" binding:"required"`
+	Username string `json:"username" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=8"`
 }
@@ -31,8 +32,8 @@ type loginRequest struct {
 }
 
 type updateRequest struct {
-	Name  string `json:"name"`
-	Email string `json:"email" binding:"omitempty,email"`
+	FullName string `json:"full_name"`
+	Email    string `json:"email" binding:"omitempty,email"`
 }
 
 // Register godoc
@@ -54,7 +55,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.Register(c.Request.Context(), req.Name, req.Email, req.Password)
+	result, err := h.service.Register(c.Request.Context(), req.FullName, req.Username, req.Email, req.Password)
 	if err != nil {
 		response.Error(c, http.StatusConflict, "registration failed", err.Error())
 		return
@@ -148,7 +149,7 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 // Update godoc
 //
 //	@Summary		Update user
-//	@Description	Update user name and/or email
+//	@Description	Update user full name and/or email
 //	@Tags			Users
 //	@Accept			json
 //	@Produce		json
@@ -172,7 +173,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.Update(c.Request.Context(), id, req.Name, req.Email)
+	user, err := h.service.Update(c.Request.Context(), id, req.FullName, req.Email)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "update failed", err.Error())
 		return

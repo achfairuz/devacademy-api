@@ -24,11 +24,11 @@ type AuthResult struct {
 }
 
 type UserService interface {
-	Register(ctx context.Context, name, email, password string) (*AuthResult, error)
+	Register(ctx context.Context, fullName, username, email, password string) (*AuthResult, error)
 	Login(ctx context.Context, email, password string) (*AuthResult, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*models.User, error)
 	GetAll(ctx context.Context, page, pageSize int) ([]models.User, error)
-	Update(ctx context.Context, id uuid.UUID, name, email string) (*models.User, error)
+	Update(ctx context.Context, id uuid.UUID, fullName, email string) (*models.User, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
@@ -42,7 +42,7 @@ func NewUserService(repo repositories.UserRepository, secret string, expiry int)
 	return &userService{repo: repo, secret: secret, expiry: expiry}
 }
 
-func (s *userService) Register(ctx context.Context, name, email, password string) (*AuthResult, error) {
+func (s *userService) Register(ctx context.Context, fullName, username, email, password string) (*AuthResult, error) {
 	existing, err := s.repo.FindByEmail(ctx, email)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (s *userService) Register(ctx context.Context, name, email, password string
 		return nil, err
 	}
 
-	user := &models.User{Name: name, Email: email, Password: hash}
+	user := &models.User{FullName: fullName, Username: username, Email: email, Password: hash}
 	if err := s.repo.Create(ctx, user); err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (s *userService) GetAll(ctx context.Context, page, pageSize int) ([]models.
 	return s.repo.FindAll(ctx, pageSize, offset)
 }
 
-func (s *userService) Update(ctx context.Context, id uuid.UUID, name, email string) (*models.User, error) {
+func (s *userService) Update(ctx context.Context, id uuid.UUID, fullName, email string) (*models.User, error) {
 	user, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -127,8 +127,8 @@ func (s *userService) Update(ctx context.Context, id uuid.UUID, name, email stri
 		}
 		user.Email = email
 	}
-	if name != "" {
-		user.Name = name
+	if fullName != "" {
+		user.FullName = fullName
 	}
 
 	if err := s.repo.Update(ctx, user); err != nil {
