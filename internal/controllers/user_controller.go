@@ -1,4 +1,4 @@
-package handlers
+package controllers
 
 import (
 	"net/http"
@@ -11,12 +11,12 @@ import (
 	"github.com/iyuz/devacademy-api/pkg/response"
 )
 
-type UserHandler struct {
+type UserController struct {
 	service services.UserService
 }
 
-func NewUserHandler(service services.UserService) *UserHandler {
-	return &UserHandler{service: service}
+func NewUserController(service services.UserService) *UserController {
+	return &UserController{service: service}
 }
 
 type registerRequest struct {
@@ -48,14 +48,14 @@ type updateRequest struct {
 //	@Failure		400		{object}	response.Response
 //	@Failure		409		{object}	response.Response
 //	@Router			/auth/register [post]
-func (h *UserHandler) Register(c *gin.Context) {
+func (ctr *UserController) Register(c *gin.Context) {
 	var req registerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid request", err.Error())
 		return
 	}
 
-	result, err := h.service.Register(c.Request.Context(), req.FullName, req.Username, req.Email, req.Password)
+	result, err := ctr.service.Register(c.Request.Context(), req.FullName, req.Username, req.Email, req.Password)
 	if err != nil {
 		response.Error(c, http.StatusConflict, "registration failed", err.Error())
 		return
@@ -76,14 +76,14 @@ func (h *UserHandler) Register(c *gin.Context) {
 //	@Failure		400		{object}	response.Response
 //	@Failure		401		{object}	response.Response
 //	@Router			/auth/login [post]
-func (h *UserHandler) Login(c *gin.Context) {
+func (ctr *UserController) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid request", err.Error())
 		return
 	}
 
-	result, err := h.service.Login(c.Request.Context(), req.Email, req.Password)
+	result, err := ctr.service.Login(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
 		response.Error(c, http.StatusUnauthorized, "login failed", err.Error())
 		return
@@ -105,14 +105,14 @@ func (h *UserHandler) Login(c *gin.Context) {
 //	@Failure		401	{object}	response.Response
 //	@Failure		404	{object}	response.Response
 //	@Router			/users/{id} [get]
-func (h *UserHandler) GetByID(c *gin.Context) {
+func (ctr *UserController) GetByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid id", err.Error())
 		return
 	}
 
-	user, err := h.service.GetByID(c.Request.Context(), id)
+	user, err := ctr.service.GetByID(c.Request.Context(), id)
 	if err != nil {
 		response.Error(c, http.StatusNotFound, "user not found", err.Error())
 		return
@@ -133,11 +133,11 @@ func (h *UserHandler) GetByID(c *gin.Context) {
 //	@Success		200			{object}	response.Response
 //	@Failure		401			{object}	response.Response
 //	@Router			/users [get]
-func (h *UserHandler) GetAll(c *gin.Context) {
+func (ctr *UserController) GetAll(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
-	users, err := h.service.GetAll(c.Request.Context(), page, pageSize)
+	users, err := ctr.service.GetAll(c.Request.Context(), page, pageSize)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "failed to get users", err.Error())
 		return
@@ -160,7 +160,7 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 //	@Failure		400		{object}	response.Response
 //	@Failure		401		{object}	response.Response
 //	@Router			/users/{id} [put]
-func (h *UserHandler) Update(c *gin.Context) {
+func (ctr *UserController) Update(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid id", err.Error())
@@ -173,7 +173,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.Update(c.Request.Context(), id, req.FullName, req.Email)
+	user, err := ctr.service.Update(c.Request.Context(), id, req.FullName, req.Email)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "update failed", err.Error())
 		return
@@ -195,14 +195,14 @@ func (h *UserHandler) Update(c *gin.Context) {
 //	@Failure		401	{object}	response.Response
 //	@Failure		404	{object}	response.Response
 //	@Router			/users/{id} [delete]
-func (h *UserHandler) Delete(c *gin.Context) {
+func (ctr *UserController) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid id", err.Error())
 		return
 	}
 
-	if err := h.service.Delete(c.Request.Context(), id); err != nil {
+	if err := ctr.service.Delete(c.Request.Context(), id); err != nil {
 		response.Error(c, http.StatusNotFound, "delete failed", err.Error())
 		return
 	}

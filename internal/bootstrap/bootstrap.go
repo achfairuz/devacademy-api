@@ -6,8 +6,9 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/iyuz/devacademy-api/internal/config"
+	"github.com/iyuz/devacademy-api/internal/controllers"
 	"github.com/iyuz/devacademy-api/internal/database"
-	"github.com/iyuz/devacademy-api/internal/handlers"
+	"github.com/iyuz/devacademy-api/internal/repositories"
 	"github.com/iyuz/devacademy-api/internal/repositories/impl"
 	"github.com/iyuz/devacademy-api/internal/routes"
 	"github.com/iyuz/devacademy-api/internal/services"
@@ -25,9 +26,12 @@ func Init(cfg *config.Config) *App {
 
 	userRepo := impl.NewUserRepository(db)
 	userService := services.NewUserService(userRepo, cfg.JWT.Secret, cfg.JWT.Expiry)
-	userHandler := handlers.NewUserHandler(userService)
+	userController := controllers.NewUserController(userService)
 
-	router := routes.SetupRouter(cfg, &routes.Handler{User: userHandler})
+	categoryService := services.NewCategoryService(repositories.NewCategoryRepository(db))
+	categoryController := controllers.NewCategoryController(categoryService)
+
+	router := routes.SetupRouter(cfg, &routes.Controller{User: userController, Category: categoryController})
 
 	return &App{
 		DB:     db,

@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.loginRequest"
+                            "$ref": "#/definitions/controllers.loginRequest"
                         }
                     }
                 ],
@@ -81,7 +81,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.registerRequest"
+                            "$ref": "#/definitions/controllers.registerRequest"
                         }
                     }
                 ],
@@ -234,7 +234,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.updateRequest"
+                            "$ref": "#/definitions/controllers.updateRequest"
                         }
                     }
                 ],
@@ -312,7 +312,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.loginRequest": {
+        "controllers.loginRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -327,7 +327,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.registerRequest": {
+        "controllers.registerRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -347,7 +347,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.updateRequest": {
+        "controllers.updateRequest": {
             "type": "object",
             "properties": {
                 "email": {
