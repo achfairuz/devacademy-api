@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/iyuz/devacademy-api/internal/models"
 	"github.com/iyuz/devacademy-api/internal/utils"
 	"github.com/iyuz/devacademy-api/pkg/response"
 )
@@ -35,6 +36,25 @@ func Auth(secret string) gin.HandlerFunc {
 
 		c.Set("user_id", claims.UserID)
 		c.Set("email", claims.Email)
+		c.Set("role", claims.Role)
+		c.Next()
+	}
+}
+
+func RequireRole(roles ...models.Role) gin.HandlerFunc {
+	allowed := make(map[string]bool, len(roles))
+	for _, r := range roles {
+		allowed[r.String()] = true
+	}
+
+	return func(c *gin.Context) {
+		role, _ := c.Get("role")
+		roleStr, _ := role.(string)
+		if !allowed[roleStr] {
+			response.Error(c, http.StatusForbidden, "forbidden", "insufficient role permission")
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }

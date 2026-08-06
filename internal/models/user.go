@@ -15,7 +15,7 @@ type User struct {
 	Password      string    `gorm:"size:255;not null"`
 	Phone         string    `gorm:"size:30"`
 	Avatar        string    `gorm:"type:text"`
-	Role          Role      `gorm:"type:varchar(20);not null;default:student;check:chk_users_role,role IN ('admin','instructor','student')"`
+	Role          Role      `gorm:"type:varchar(20);not null;default:student;check:chk_users_role,role IN ('admin','mentor','student')"`
 	Status        bool      `gorm:"not null;default:true"`
 	EmailVerified bool      `gorm:"column:email_verified;not null;default:false"`
 	CreatedAt     time.Time

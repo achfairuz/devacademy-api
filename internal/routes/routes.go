@@ -6,6 +6,7 @@ import (
 	"github.com/iyuz/devacademy-api/internal/config"
 	"github.com/iyuz/devacademy-api/internal/handlers"
 	"github.com/iyuz/devacademy-api/internal/middleware"
+	"github.com/iyuz/devacademy-api/internal/models"
 )
 
 type Handler struct {
@@ -26,10 +27,10 @@ func SetupRouter(cfg *config.Config, h *Handler) *gin.Engine {
 
 		users := api.Group("/users", middleware.Auth(cfg.JWT.Secret))
 		{
-			users.GET("", h.User.GetAll)
+			users.GET("", middleware.RequireRole(models.RoleAdmin), h.User.GetAll)
 			users.GET("/:id", h.User.GetByID)
 			users.PUT("/:id", h.User.Update)
-			users.DELETE("/:id", h.User.Delete)
+			users.DELETE("/:id", middleware.RequireRole(models.RoleAdmin), h.User.Delete)
 		}
 	}
 

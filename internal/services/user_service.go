@@ -56,12 +56,12 @@ func (s *userService) Register(ctx context.Context, fullName, username, email, p
 		return nil, err
 	}
 
-	user := &models.User{FullName: fullName, Username: username, Email: email, Password: hash}
+	user := &models.User{FullName: fullName, Username: username, Email: email, Password: hash, Role: models.RoleStudent}
 	if err := s.repo.Create(ctx, user); err != nil {
 		return nil, err
 	}
 
-	token, err := utils.GenerateToken(s.secret, s.expiry, user.ID, user.Email)
+	token, err := utils.GenerateToken(s.secret, s.expiry, user.ID, user.Email, user.Role.String())
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (s *userService) Login(ctx context.Context, email, password string) (*AuthR
 		return nil, ErrInvalidCreds
 	}
 
-	token, err := utils.GenerateToken(s.secret, s.expiry, user.ID, user.Email)
+	token, err := utils.GenerateToken(s.secret, s.expiry, user.ID, user.Email, user.Role.String())
 	if err != nil {
 		return nil, err
 	}
