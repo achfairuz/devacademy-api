@@ -1,9 +1,16 @@
 package utils
 
 import (
-	"image/jpeg"
-
+	"bytes"
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/deepteams/webp"
 )
 
 func Compress(inputFile string) (string, error) {
@@ -13,19 +20,29 @@ func Compress(inputFile string) (string, error) {
 	}
 	defer file.Close()
 
-	img, err := jpeg.Decode(file)
+	img, format, err := image.Decode(file)
 	if err != nil {
-		return "", err
+		return inputFile, nil
 	}
-	OutputFile, err := os.Create(inputFile + ".webp")
-	if err != nil {
-		return "", err
-	}
-	defer OutputFile.Close()
 
-	err = jpeg.Encode(OutputFile, img, &jpeg.Options{Quality: 75})
-	if err != nil {
+	if format == "webp" {
+		return inputFile, nil
+	}
+
+	outputFile := strings.TrimSuffix(inputFile, filepath.Ext(inputFile)) + "-compressed.webp"
+
+	var buf bytes.Buffer
+	if err := webp.Encode(&buf, img, webp.DefaultOptions()); err != nil {
 		return "", err
 	}
-	return OutputFile.Name(), nil
+
+	if err := os.WriteFile(outputFile, buf.Bytes(), 0o644); err != nil {
+		return "", err
+	}
+
+	if err := os.Remove(inputFile); err != nil {
+		return "", err
+	}
+
+	return outputFile, nil
 }

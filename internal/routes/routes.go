@@ -12,6 +12,7 @@ import (
 type Controller struct {
 	User     *controllers.UserController
 	Category *controllers.CategoryController
+	Course   *controllers.CourseController
 }
 
 func SetupRouter(cfg *config.Config, ctr *Controller) *gin.Engine {
@@ -35,6 +36,21 @@ func SetupRouter(cfg *config.Config, ctr *Controller) *gin.Engine {
 			categories.GET("/:id", ctr.Category.GetByID)
 			categories.POST("", ctr.Category.Create, middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleAdmin))
 			categories.DELETE("/:id", ctr.Category.Delete, middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleAdmin))
+		}
+
+		courses := api.Group("/courses")
+		{
+			courses.GET("", ctr.Course.GetAll)
+			courses.GET("/:id", ctr.Course.GetByID)
+			courses.GET("/slug/:slug", ctr.Course.GetBySlug)
+			courses.GET("/mentor/:mentor_id", ctr.Course.GetByMentor)
+			courses.GET("/category/:category_id", ctr.Course.GetByCategory)
+			courses.GET("/level", ctr.Course.GetByLevel)
+
+			courses.POST("", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Course.Create)
+			courses.PUT("/:id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Course.Update)
+			courses.PATCH("/slug/:slug/status", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Course.UpdateStatus)
+			courses.DELETE("/:id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Course.Delete)
 		}
 
 		users := api.Group("/users", middleware.Auth(cfg.JWT.Secret))

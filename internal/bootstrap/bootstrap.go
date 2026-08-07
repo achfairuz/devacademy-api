@@ -31,7 +31,14 @@ func Init(cfg *config.Config) *App {
 	categoryService := services.NewCategoryService(repositories.NewCategoryRepository(db))
 	categoryController := controllers.NewCategoryController(categoryService)
 
-	router := routes.SetupRouter(cfg, &routes.Controller{User: userController, Category: categoryController})
+	courseService := services.NewCourseService(impl.NewCourseRepository(db))
+	courseController := controllers.NewCourseController(courseService)
+
+	router := routes.SetupRouter(cfg, &routes.Controller{
+		User:     userController,
+		Category: categoryController,
+		Course:   courseController,
+	})
 
 	return &App{
 		DB:     db,
