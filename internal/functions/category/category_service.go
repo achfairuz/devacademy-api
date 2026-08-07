@@ -1,4 +1,4 @@
-package services
+package category
 
 import (
 	"context"
@@ -7,9 +7,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"github.com/iyuz/devacademy-api/internal/dto"
 	"github.com/iyuz/devacademy-api/internal/models"
-	"github.com/iyuz/devacademy-api/internal/repositories"
 	"github.com/iyuz/devacademy-api/internal/utils"
 )
 
@@ -19,22 +17,22 @@ var (
 )
 
 type CategoryService interface {
-	Create(ctx context.Context, req *dto.CreateCategoryRequest) (*models.Category, error)
+	Create(ctx context.Context, req *CreateCategoryRequest) (*models.Category, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*models.Category, error)
 	GetAll(ctx context.Context, page, pageSize int) ([]models.Category, error)
-	Update(ctx context.Context, id uuid.UUID, req *dto.UpdateCategoryRequest) (*models.Category, error)
+	Update(ctx context.Context, id uuid.UUID, req *UpdateCategoryRequest) (*models.Category, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type categoryService struct {
-	repo repositories.CategoryRepository
+	repo CategoryRepository
 }
 
-func NewCategoryService(repo repositories.CategoryRepository) CategoryService {
+func NewCategoryService(repo CategoryRepository) CategoryService {
 	return &categoryService{repo: repo}
 }
 
-func (s *categoryService) Create(ctx context.Context, req *dto.CreateCategoryRequest) (*models.Category, error) {
+func (s *categoryService) Create(ctx context.Context, req *CreateCategoryRequest) (*models.Category, error) {
 	category := &models.Category{
 		Name: req.Name,
 		Slug: utils.Slugify(req.Name),
@@ -70,7 +68,7 @@ func (s *categoryService) GetAll(ctx context.Context, page, pageSize int) ([]mod
 	return s.repo.FindAll(ctx, pageSize, (page-1)*pageSize)
 }
 
-func (s *categoryService) Update(ctx context.Context, id uuid.UUID, req *dto.UpdateCategoryRequest) (*models.Category, error) {
+func (s *categoryService) Update(ctx context.Context, id uuid.UUID, req *UpdateCategoryRequest) (*models.Category, error) {
 	category, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err

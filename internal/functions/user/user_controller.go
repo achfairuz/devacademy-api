@@ -1,4 +1,4 @@
-package controllers
+package user
 
 import (
 	"net/http"
@@ -7,33 +7,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/iyuz/devacademy-api/internal/services"
 	"github.com/iyuz/devacademy-api/pkg/response"
 )
 
 type UserController struct {
-	service services.UserService
+	service UserService
 }
 
-func NewUserController(service services.UserService) *UserController {
+func NewUserController(service UserService) *UserController {
 	return &UserController{service: service}
-}
-
-type registerRequest struct {
-	FullName string `json:"full_name" binding:"required"`
-	Username string `json:"username" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=8"`
-}
-
-type loginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-}
-
-type updateRequest struct {
-	FullName string `json:"full_name"`
-	Email    string `json:"email" binding:"omitempty,email"`
 }
 
 // Register godoc

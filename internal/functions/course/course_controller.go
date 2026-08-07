@@ -1,4 +1,4 @@
-package controllers
+package course
 
 import (
 	"net/http"
@@ -8,8 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/iyuz/devacademy-api/internal/dto"
-	"github.com/iyuz/devacademy-api/internal/services"
 	"github.com/iyuz/devacademy-api/internal/utils"
 	"github.com/iyuz/devacademy-api/pkg/response"
 )
@@ -17,10 +15,10 @@ import (
 const maxThumbSize = 5 << 20
 
 type CourseController struct {
-	service services.CourseService
+	service CourseService
 }
 
-func NewCourseController(service services.CourseService) *CourseController {
+func NewCourseController(service CourseService) *CourseController {
 	return &CourseController{service: service}
 }
 
@@ -84,7 +82,7 @@ func (ctr *CourseController) Create(c *gin.Context) {
 	price, _ := strconv.ParseFloat(c.PostForm("price"), 64)
 	duration, _ := strconv.Atoi(c.PostForm("duration"))
 
-	req := &dto.CreateCourseRequest{
+	req := &CreateCourseRequest{
 		MentorID:    mentorID,
 		CategoryID:  categoryID,
 		Title:       title,
@@ -296,7 +294,7 @@ func (ctr *CourseController) Update(c *gin.Context) {
 		return
 	}
 
-	req := &dto.UpdateCourseRequest{}
+	req := &UpdateCourseRequest{}
 	if err := c.ShouldBind(req); err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid request", err.Error())
 		return

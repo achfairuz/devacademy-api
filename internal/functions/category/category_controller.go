@@ -1,4 +1,4 @@
-package controllers
+package category
 
 import (
 	"net/http"
@@ -7,16 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/iyuz/devacademy-api/internal/dto"
-	"github.com/iyuz/devacademy-api/internal/services"
 	"github.com/iyuz/devacademy-api/pkg/response"
 )
 
 type CategoryController struct {
-	service services.CategoryService
+	service CategoryService
 }
 
-func NewCategoryController(service services.CategoryService) *CategoryController {
+func NewCategoryController(service CategoryService) *CategoryController {
 	return &CategoryController{service: service}
 }
 
@@ -33,7 +31,7 @@ func NewCategoryController(service services.CategoryService) *CategoryController
 //	@Failure		400		{object}	response.Response
 //	@Router			/categories [post]
 func (ctr *CategoryController) Create(c *gin.Context) {
-	req := &dto.CreateCategoryRequest{}
+	req := &CreateCategoryRequest{}
 	if err := c.ShouldBind(req); err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid request", err.Error())
 		return

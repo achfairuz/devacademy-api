@@ -1,10 +1,11 @@
-package repositories
+package category
 
 import (
 	"context"
 
 	"github.com/google/uuid"
 	"github.com/iyuz/devacademy-api/internal/models"
+	"github.com/iyuz/devacademy-api/internal/repositories"
 	"gorm.io/gorm"
 )
 
@@ -17,5 +18,5 @@ type CategoryRepository interface {
 }
 
 func NewCategoryRepository(db *gorm.DB) CategoryRepository {
-	return NewBaseRepository[models.Category](db)
+	return repositories.NewBaseRepository[models.Category](db)
 }

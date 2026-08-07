@@ -1,4 +1,4 @@
-package dto
+package course
 
 import "github.com/google/uuid"
 

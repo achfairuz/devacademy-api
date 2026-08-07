@@ -4,15 +4,19 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/iyuz/devacademy-api/internal/config"
-	"github.com/iyuz/devacademy-api/internal/controllers"
+	"github.com/iyuz/devacademy-api/internal/functions/category"
+	"github.com/iyuz/devacademy-api/internal/functions/course"
+	"github.com/iyuz/devacademy-api/internal/functions/course/course_section"
+	"github.com/iyuz/devacademy-api/internal/functions/user"
 	"github.com/iyuz/devacademy-api/internal/middleware"
 	"github.com/iyuz/devacademy-api/internal/models"
 )
 
 type Controller struct {
-	User     *controllers.UserController
-	Category *controllers.CategoryController
-	Course   *controllers.CourseController
+	User          *user.UserController
+	Category      *category.CategoryController
+	Course        *course.CourseController
+	CourseSection *coursesection.CourseSectionController
 }
 
 func SetupRouter(cfg *config.Config, ctr *Controller) *gin.Engine {
@@ -46,11 +50,20 @@ func SetupRouter(cfg *config.Config, ctr *Controller) *gin.Engine {
 			courses.GET("/mentor/:mentor_id", ctr.Course.GetByMentor)
 			courses.GET("/category/:category_id", ctr.Course.GetByCategory)
 			courses.GET("/level", ctr.Course.GetByLevel)
+			courses.GET("/:course_id/sections", ctr.CourseSection.GetByCourse)
+			courses.POST("/:course_id/sections", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.CourseSection.Create)
 
 			courses.POST("", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Course.Create)
 			courses.PUT("/:id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Course.Update)
 			courses.PATCH("/slug/:slug/status", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Course.UpdateStatus)
 			courses.DELETE("/:id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Course.Delete)
+		}
+
+		sections := api.Group("/sections", middleware.Auth(cfg.JWT.Secret))
+		{
+			sections.GET("/:id", ctr.CourseSection.GetByID)
+			sections.PUT("/:id", middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.CourseSection.Update)
+			sections.DELETE("/:id", middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.CourseSection.Delete)
 		}
 
 		users := api.Group("/users", middleware.Auth(cfg.JWT.Secret))

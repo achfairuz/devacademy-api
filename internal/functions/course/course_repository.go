@@ -1,4 +1,4 @@
-package impl
+package course
 
 import (
 	"context"
@@ -11,12 +11,25 @@ import (
 	"github.com/iyuz/devacademy-api/internal/repositories"
 )
 
+type CourseRepository interface {
+	Create(ctx context.Context, course *models.Course) error
+	FindByID(ctx context.Context, id uuid.UUID) (*models.Course, error)
+	FindBySlug(ctx context.Context, slug string) (*models.Course, error)
+	FindByMentor(ctx context.Context, mentorID uuid.UUID, limit, offset int) ([]models.Course, error)
+	FindByCategory(ctx context.Context, categoryID uuid.UUID, limit, offset int) ([]models.Course, error)
+	FindAll(ctx context.Context, limit, offset int) ([]models.Course, error)
+	FindByLevel(ctx context.Context, level string, limit, offset int) ([]models.Course, error)
+	Update(ctx context.Context, course *models.Course) error
+	UpdateStatus(ctx context.Context, slug string, status string) error
+	Delete(ctx context.Context, id uuid.UUID) error
+}
+
 type courseRepository struct {
 	*repositories.BaseRepository[models.Course]
 	db *gorm.DB
 }
 
-func NewCourseRepository(db *gorm.DB) repositories.CourseRepository {
+func NewCourseRepository(db *gorm.DB) CourseRepository {
 	return &courseRepository{
 		BaseRepository: repositories.NewBaseRepository[models.Course](db),
 		db:             db,

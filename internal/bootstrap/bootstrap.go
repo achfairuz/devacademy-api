@@ -6,12 +6,12 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/iyuz/devacademy-api/internal/config"
-	"github.com/iyuz/devacademy-api/internal/controllers"
 	"github.com/iyuz/devacademy-api/internal/database"
-	"github.com/iyuz/devacademy-api/internal/repositories"
-	"github.com/iyuz/devacademy-api/internal/repositories/impl"
+	"github.com/iyuz/devacademy-api/internal/functions/category"
+	"github.com/iyuz/devacademy-api/internal/functions/course"
+	"github.com/iyuz/devacademy-api/internal/functions/course/course_section"
+	"github.com/iyuz/devacademy-api/internal/functions/user"
 	"github.com/iyuz/devacademy-api/internal/routes"
-	"github.com/iyuz/devacademy-api/internal/services"
 )
 
 type App struct {
@@ -24,20 +24,23 @@ func Init(cfg *config.Config) *App {
 	db := database.InitPostgres(cfg)
 	rdb := database.InitRedis(cfg)
 
-	userRepo := impl.NewUserRepository(db)
-	userService := services.NewUserService(userRepo, cfg.JWT.Secret, cfg.JWT.Expiry)
-	userController := controllers.NewUserController(userService)
+	userService := user.NewUserService(user.NewUserRepository(db), cfg.JWT.Secret, cfg.JWT.Expiry)
+	userController := user.NewUserController(userService)
 
-	categoryService := services.NewCategoryService(repositories.NewCategoryRepository(db))
-	categoryController := controllers.NewCategoryController(categoryService)
+	categoryService := category.NewCategoryService(category.NewCategoryRepository(db))
+	categoryController := category.NewCategoryController(categoryService)
 
-	courseService := services.NewCourseService(impl.NewCourseRepository(db))
-	courseController := controllers.NewCourseController(courseService)
+	courseService := course.NewCourseService(course.NewCourseRepository(db))
+	courseController := course.NewCourseController(courseService)
+
+	courseSectionService := coursesection.NewCourseSectionService(coursesection.NewCourseSectionRepository(db))
+	courseSectionController := coursesection.NewCourseSectionController(courseSectionService, courseService)
 
 	router := routes.SetupRouter(cfg, &routes.Controller{
-		User:     userController,
-		Category: categoryController,
-		Course:   courseController,
+		User:          userController,
+		Category:      categoryController,
+		Course:        courseController,
+		CourseSection: courseSectionController,
 	})
 
 	return &App{

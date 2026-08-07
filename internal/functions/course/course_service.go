@@ -1,4 +1,4 @@
-package services
+package course
 
 import (
 	"context"
@@ -7,36 +7,37 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"github.com/iyuz/devacademy-api/internal/dto"
 	"github.com/iyuz/devacademy-api/internal/models"
-	"github.com/iyuz/devacademy-api/internal/repositories"
 	"github.com/iyuz/devacademy-api/internal/utils"
 )
 
-var ErrCourseNotFound = errors.New("course not found")
+var (
+	ErrCourseNotFound = errors.New("course not found")
+	ErrSlugTaken      = errors.New("slug already exists")
+)
 
 type CourseService interface {
-	Create(ctx context.Context, req *dto.CreateCourseRequest) (*models.Course, error)
+	Create(ctx context.Context, req *CreateCourseRequest) (*models.Course, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*models.Course, error)
 	GetBySlug(ctx context.Context, slug string) (*models.Course, error)
 	GetAll(ctx context.Context, page, pageSize int) ([]models.Course, error)
 	GetByMentor(ctx context.Context, mentorID uuid.UUID, page, pageSize int) ([]models.Course, error)
 	GetByCategory(ctx context.Context, categoryID uuid.UUID, page, pageSize int) ([]models.Course, error)
 	GetByLevel(ctx context.Context, level string, page, pageSize int) ([]models.Course, error)
-	Update(ctx context.Context, id uuid.UUID, req *dto.UpdateCourseRequest) (*models.Course, error)
+	Update(ctx context.Context, id uuid.UUID, req *UpdateCourseRequest) (*models.Course, error)
 	UpdateStatus(ctx context.Context, slug string, status string) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type courseService struct {
-	repo repositories.CourseRepository
+	repo CourseRepository
 }
 
-func NewCourseService(repo repositories.CourseRepository) CourseService {
+func NewCourseService(repo CourseRepository) CourseService {
 	return &courseService{repo: repo}
 }
 
-func (s *courseService) Create(ctx context.Context, req *dto.CreateCourseRequest) (*models.Course, error) {
+func (s *courseService) Create(ctx context.Context, req *CreateCourseRequest) (*models.Course, error) {
 	if req.Status == "" {
 		req.Status = "draft"
 	}
@@ -136,7 +137,7 @@ func (s *courseService) GetByLevel(ctx context.Context, level string, page, page
 	return s.repo.FindByLevel(ctx, level, pageSize, (page-1)*pageSize)
 }
 
-func (s *courseService) Update(ctx context.Context, id uuid.UUID, req *dto.UpdateCourseRequest) (*models.Course, error) {
+func (s *courseService) Update(ctx context.Context, id uuid.UUID, req *UpdateCourseRequest) (*models.Course, error) {
 	course, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
-package services
+package user
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/iyuz/devacademy-api/internal/models"
-	"github.com/iyuz/devacademy-api/internal/repositories"
 	"github.com/iyuz/devacademy-api/internal/utils"
 )
 
@@ -33,12 +32,12 @@ type UserService interface {
 }
 
 type userService struct {
-	repo   repositories.UserRepository
+	repo   UserRepository
 	secret string
 	expiry int
 }
 
-func NewUserService(repo repositories.UserRepository, secret string, expiry int) UserService {
+func NewUserService(repo UserRepository, secret string, expiry int) UserService {
 	return &userService{repo: repo, secret: secret, expiry: expiry}
 }
 
