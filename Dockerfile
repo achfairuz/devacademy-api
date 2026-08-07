@@ -6,12 +6,14 @@ COPY go.mod go.sum ./
 COPY vendor ./vendor
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -o /app/server ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -o /app/server ./cmd/server \
+    && touch /app/.env
 
 FROM scratch
 
 WORKDIR /app
 COPY --from=build /app/server /app/server
+COPY --from=build /app/.env /app/.env
 
 EXPOSE 8080
 

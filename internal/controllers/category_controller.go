@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -10,11 +9,8 @@ import (
 
 	"github.com/iyuz/devacademy-api/internal/dto"
 	"github.com/iyuz/devacademy-api/internal/services"
-	"github.com/iyuz/devacademy-api/internal/utils"
 	"github.com/iyuz/devacademy-api/pkg/response"
 )
-
-const maxImageSize = 2 << 20
 
 type CategoryController struct {
 	service services.CategoryService
@@ -27,27 +23,20 @@ func NewCategoryController(service services.CategoryService) *CategoryController
 // Create godoc
 //
 //	@Summary		Create a new category
-//	@Description	Create category with optional icon upload (multipart/form-data)
+//	@Description	Create category with icon name (multipart/form-data)
 //	@Tags			Categories
 //	@Accept			multipart/form-data
 //	@Produce		json
 //	@Param			name	formData	string	true	"Category name"
-//	@Param			icon	formData	file	false	"Category icon (jpg/jpeg/png/gif/webp/svg/avif, max 2MB)"
+//	@Param			icon	formData	string	false	"Category icon name (Lucide)"
 //	@Success		201		{object}	response.Response
 //	@Failure		400		{object}	response.Response
-//	@Router			/categories [post]
+//	@Router			/mentor/categories [post]
 func (ctr *CategoryController) Create(c *gin.Context) {
-	req := &dto.CreateCategoryRequest{
-		Name: c.PostForm("name"),
-	}
-
-	if file, err := c.FormFile("icon"); err == nil {
-		path, err := utils.SaveUploadedImage(file, "./uploads/categories", maxImageSize)
-		if err != nil {
-			response.Error(c, http.StatusBadRequest, "invalid image", err.Error())
-			return
-		}
-		req.Icon = "/uploads/categories/" + filepath.Base(path)
+	req := &dto.CreateCategoryRequest{}
+	if err := c.ShouldBind(req); err != nil {
+		response.Error(c, http.StatusBadRequest, "invalid request", err.Error())
+		return
 	}
 
 	if req.Name == "" {
@@ -73,7 +62,7 @@ func (ctr *CategoryController) Create(c *gin.Context) {
 //	@Param			id	path		string	true	"Category ID"
 //	@Success		200	{object}	response.Response
 //	@Failure		404	{object}	response.Response
-//	@Router			/categories/{id} [get]
+//	@Router			/mentor/categories/{id} [get]
 func (ctr *CategoryController) GetByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -99,7 +88,7 @@ func (ctr *CategoryController) GetByID(c *gin.Context) {
 //	@Param			page		query	int	false	"Page number"
 //	@Param			page_size	query	int	false	"Items per page"
 //	@Success		200			{object}	response.Response
-//	@Router			/categories [get]
+//	@Router			/mentor/categories [get]
 func (ctr *CategoryController) GetAll(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
@@ -113,48 +102,6 @@ func (ctr *CategoryController) GetAll(c *gin.Context) {
 	response.Success(c, "categories retrieved", categories)
 }
 
-// Update godoc
-//
-//	@Summary		Update category
-//	@Description	Update category name and/or icon
-//	@Tags			Categories
-//	@Accept			multipart/form-data
-//	@Produce		json
-//	@Param			id		path		string	true	"Category ID"
-//	@Param			name	formData	string	false	"Category name"
-//	@Param			icon	formData	file	false	"Category icon"
-//	@Success		200		{object}	response.Response
-//	@Failure		404		{object}	response.Response
-//	@Router			/categories/{id} [put]
-func (ctr *CategoryController) Update(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "invalid id", err.Error())
-		return
-	}
-
-	req := &dto.UpdateCategoryRequest{
-		Name: c.PostForm("name"),
-	}
-
-	if file, err := c.FormFile("icon"); err == nil {
-		path, err := utils.SaveUploadedImage(file, "./uploads/categories", maxImageSize)
-		if err != nil {
-			response.Error(c, http.StatusBadRequest, "invalid image", err.Error())
-			return
-		}
-		req.Icon = "/uploads/categories/" + filepath.Base(path)
-	}
-
-	category, err := ctr.service.Update(c.Request.Context(), id, req)
-	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "update failed", err.Error())
-		return
-	}
-
-	response.Success(c, "category updated", category)
-}
-
 // Delete godoc
 //
 //	@Summary		Delete category
@@ -164,7 +111,7 @@ func (ctr *CategoryController) Update(c *gin.Context) {
 //	@Param			id	path	string	true	"Category ID"
 //	@Success		200	{object}	response.Response
 //	@Failure		404	{object}	response.Response
-//	@Router			/categories/{id} [delete]
+//	@Router			/mentor/categories/{id} [delete]
 func (ctr *CategoryController) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {

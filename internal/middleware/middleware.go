@@ -59,6 +59,18 @@ func RequireRole(roles ...models.Role) gin.HandlerFunc {
 	}
 }
 
+func AdminOnly() gin.HandlerFunc {
+	return RequireRole(models.RoleAdmin)
+}
+
+func MentorOnly() gin.HandlerFunc {
+	return RequireRole(models.RoleMentor)
+}
+
+func StudentOnly() gin.HandlerFunc {
+	return RequireRole(models.RoleStudent)
+}
+
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")

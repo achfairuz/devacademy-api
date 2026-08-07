@@ -6,7 +6,6 @@ import (
 	"github.com/iyuz/devacademy-api/internal/config"
 	"github.com/iyuz/devacademy-api/internal/controllers"
 	"github.com/iyuz/devacademy-api/internal/middleware"
-	"github.com/iyuz/devacademy-api/internal/models"
 )
 
 type Controller struct {
@@ -29,21 +28,26 @@ func SetupRouter(cfg *config.Config, ctr *Controller) *gin.Engine {
 			auth.POST("/login", ctr.User.Login)
 		}
 
-		categories := api.Group("/categories")
+		admin := api.Group("/admin", middleware.Auth(cfg.JWT.Secret), middleware.AdminOnly())
 		{
-			categories.GET("", ctr.Category.GetAll)
-			categories.GET("/:id", ctr.Category.GetByID)
-			categories.POST("", ctr.Category.Create)
-			categories.PUT("/:id", ctr.Category.Update)
-			categories.DELETE("/:id", ctr.Category.Delete)
+			admin.GET("/users", ctr.User.GetAll)
+			admin.GET("/users/:id", ctr.User.GetByID)
+			admin.PUT("/users/:id", ctr.User.Update)
+			admin.DELETE("/users/:id", ctr.User.Delete)
 		}
 
-		users := api.Group("/users", middleware.Auth(cfg.JWT.Secret))
+		mentor := api.Group("/mentor", middleware.Auth(cfg.JWT.Secret), middleware.MentorOnly())
 		{
-			users.GET("", middleware.RequireRole(models.RoleAdmin), ctr.User.GetAll)
-			users.GET("/:id", ctr.User.GetByID)
-			users.PUT("/:id", ctr.User.Update)
-			users.DELETE("/:id", middleware.RequireRole(models.RoleAdmin), ctr.User.Delete)
+			mentor.GET("/categories", ctr.Category.GetAll)
+			mentor.GET("/categories/:id", ctr.Category.GetByID)
+			mentor.POST("/categories", ctr.Category.Create)
+			mentor.DELETE("/categories/:id", ctr.Category.Delete)
+		}
+
+		student := api.Group("/student", middleware.Auth(cfg.JWT.Secret), middleware.StudentOnly())
+		{
+			student.GET("/categories", ctr.Category.GetAll)
+			student.GET("/categories/:id", ctr.Category.GetByID)
 		}
 	}
 

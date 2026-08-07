@@ -9,7 +9,7 @@ import (
 
 type User struct {
 	ID            uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	FullName      string    `gorm:"column:full_name;size:100;not null"`
+	FullName      string    `gorm:"column:full_name;size:100;not null;default:''"`
 	Username      string    `gorm:"size:100;uniqueIndex;not null"`
 	Email         string    `gorm:"size:100;uniqueIndex;not null"`
 	Password      string    `gorm:"size:255;not null"`

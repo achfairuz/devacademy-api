@@ -1,11 +1,11 @@
 package dto
 
 type CreateCategoryRequest struct {
-	Name string `json:"name" binding:"required"`
-	Icon string `json:"icon"`
+	Name string `json:"name" form:"name" binding:"required"`
+	Icon string `json:"icon" form:"icon"`
 }
 
 type UpdateCategoryRequest struct {
-	Name string `json:"name"`
-	Icon string `json:"icon"`
+	Name string `json:"name" form:"name"`
+	Icon string `json:"icon" form:"icon"`
 }
