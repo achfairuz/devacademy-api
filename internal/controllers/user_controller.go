@@ -104,7 +104,7 @@ func (ctr *UserController) Login(c *gin.Context) {
 //	@Failure		400	{object}	response.Response
 //	@Failure		401	{object}	response.Response
 //	@Failure		404	{object}	response.Response
-//	@Router			/admin/users/{id} [get]
+//	@Router			/users/{id} [get]
 func (ctr *UserController) GetByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -132,7 +132,7 @@ func (ctr *UserController) GetByID(c *gin.Context) {
 //	@Param			page_size	query		int	false	"Items per page"
 //	@Success		200			{object}	response.Response
 //	@Failure		401			{object}	response.Response
-//	@Router			/admin/users [get]
+//	@Router			/users [get]
 func (ctr *UserController) GetAll(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
@@ -159,7 +159,7 @@ func (ctr *UserController) GetAll(c *gin.Context) {
 //	@Success		200		{object}	response.Response
 //	@Failure		400		{object}	response.Response
 //	@Failure		401		{object}	response.Response
-//	@Router			/admin/users/{id} [put]
+//	@Router			/users/{id} [put]
 func (ctr *UserController) Update(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -194,7 +194,7 @@ func (ctr *UserController) Update(c *gin.Context) {
 //	@Failure		400	{object}	response.Response
 //	@Failure		401	{object}	response.Response
 //	@Failure		404	{object}	response.Response
-//	@Router			/admin/users/{id} [delete]
+//	@Router			/users/{id} [delete]
 func (ctr *UserController) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {

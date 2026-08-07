@@ -46,7 +46,6 @@ func RequireRole(roles ...models.Role) gin.HandlerFunc {
 	for _, r := range roles {
 		allowed[r.String()] = true
 	}
-
 	return func(c *gin.Context) {
 		role, _ := c.Get("role")
 		roleStr, _ := role.(string)

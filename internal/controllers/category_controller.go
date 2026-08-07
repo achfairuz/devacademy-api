@@ -31,7 +31,7 @@ func NewCategoryController(service services.CategoryService) *CategoryController
 //	@Param			icon	formData	string	false	"Category icon name (Lucide)"
 //	@Success		201		{object}	response.Response
 //	@Failure		400		{object}	response.Response
-//	@Router			/mentor/categories [post]
+//	@Router			/categories [post]
 func (ctr *CategoryController) Create(c *gin.Context) {
 	req := &dto.CreateCategoryRequest{}
 	if err := c.ShouldBind(req); err != nil {
@@ -62,7 +62,7 @@ func (ctr *CategoryController) Create(c *gin.Context) {
 //	@Param			id	path		string	true	"Category ID"
 //	@Success		200	{object}	response.Response
 //	@Failure		404	{object}	response.Response
-//	@Router			/mentor/categories/{id} [get]
+//	@Router			/categories/{id} [get]
 func (ctr *CategoryController) GetByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -88,7 +88,7 @@ func (ctr *CategoryController) GetByID(c *gin.Context) {
 //	@Param			page		query	int	false	"Page number"
 //	@Param			page_size	query	int	false	"Items per page"
 //	@Success		200			{object}	response.Response
-//	@Router			/mentor/categories [get]
+//	@Router			/categories [get]
 func (ctr *CategoryController) GetAll(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
@@ -111,7 +111,7 @@ func (ctr *CategoryController) GetAll(c *gin.Context) {
 //	@Param			id	path	string	true	"Category ID"
 //	@Success		200	{object}	response.Response
 //	@Failure		404	{object}	response.Response
-//	@Router			/mentor/categories/{id} [delete]
+//	@Router			/categories/{id} [delete]
 func (ctr *CategoryController) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {

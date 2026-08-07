@@ -50,7 +50,162 @@ info:
   title: DevAcademy API
   version: "1.0"
 paths:
-  /admin/users:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: Login payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Login user
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account and return JWT token
+      parameters:
+      - description: Register payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.registerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Register a new user
+      tags:
+      - Auth
+  /categories:
+    get:
+      description: Retrieve paginated list of categories
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List categories
+      tags:
+      - Categories
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create category with icon name (multipart/form-data)
+      parameters:
+      - description: Category name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Category icon name (Lucide)
+        in: formData
+        name: icon
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create a new category
+      tags:
+      - Categories
+  /categories/{id}:
+    delete:
+      description: Delete a category by ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Delete category
+      tags:
+      - Categories
+    get:
+      description: Retrieve a single category by UUID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get category by ID
+      tags:
+      - Categories
+  /users:
     get:
       description: Retrieve paginated list of users
       parameters:
@@ -78,7 +233,7 @@ paths:
       summary: List all users
       tags:
       - Users
-  /admin/users/{id}:
+  /users/{id}:
     delete:
       description: Soft delete a user by ID
       parameters:
@@ -179,161 +334,6 @@ paths:
       summary: Update user
       tags:
       - Users
-  /auth/login:
-    post:
-      consumes:
-      - application/json
-      description: Authenticate user and return JWT token
-      parameters:
-      - description: Login payload
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/controllers.loginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Login user
-      tags:
-      - Auth
-  /auth/register:
-    post:
-      consumes:
-      - application/json
-      description: Create a new user account and return JWT token
-      parameters:
-      - description: Register payload
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/controllers.registerRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "409":
-          description: Conflict
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Register a new user
-      tags:
-      - Auth
-  /mentor/categories:
-    get:
-      description: Retrieve paginated list of categories
-      parameters:
-      - description: Page number
-        in: query
-        name: page
-        type: integer
-      - description: Items per page
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: List categories
-      tags:
-      - Categories
-    post:
-      consumes:
-      - multipart/form-data
-      description: Create category with icon name (multipart/form-data)
-      parameters:
-      - description: Category name
-        in: formData
-        name: name
-        required: true
-        type: string
-      - description: Category icon name (Lucide)
-        in: formData
-        name: icon
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Create a new category
-      tags:
-      - Categories
-  /mentor/categories/{id}:
-    delete:
-      description: Delete a category by ID
-      parameters:
-      - description: Category ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Delete category
-      tags:
-      - Categories
-    get:
-      description: Retrieve a single category by UUID
-      parameters:
-      - description: Category ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Get category by ID
-      tags:
-      - Categories
 securityDefinitions:
   BearerAuth:
     in: header
