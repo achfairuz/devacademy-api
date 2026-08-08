@@ -1,0 +1,818 @@
+{
+  "info": {
+    "name": "DevAcademy API",
+    "description": "Dokumentasi endpoint API DevAcademy.\n\n1. Ubah variable `baseUrl` sesuai environment (default: http://localhost:8080/api/v1)\n2. Jalankan request **Auth > Login** untuk otomatis mengisi variable `token`\n3. Isi variable path ID (course_id, section_id, dst) sesuai data yang dibuat",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
+    { "key": "host", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" },
+    { "key": "course_id", "value": "" },
+    { "key": "section_id", "value": "" },
+    { "key": "lesson_id", "value": "" },
+    { "key": "file_id", "value": "" },
+    { "key": "quiz_id", "value": "" },
+    { "key": "assignment_id", "value": "" },
+    { "key": "category_id", "value": "" },
+    { "key": "level_id", "value": "" },
+    { "key": "mentor_id", "value": "" },
+    { "key": "user_id", "value": "" },
+    { "key": "slug", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"John Doe\",\n  \"username\": \"johndoe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mentor@devacademy.com\",\n  \"password\": \"mentor123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.data && json.data.token) {",
+                  "  pm.collectionVariables.set('token', json.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{category_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{category_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Web Development\",\n  \"icon\": \"globe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{category_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{category_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Levels",
+      "item": [
+        {
+          "name": "Get All Levels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/levels",
+              "host": ["{{baseUrl}}"],
+              "path": ["levels"]
+            }
+          }
+        },
+        {
+          "name": "Get Level by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/levels/{{level_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["levels", "{{level_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Level",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Intermediate\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/levels",
+              "host": ["{{baseUrl}}"],
+              "path": ["levels"]
+            }
+          }
+        },
+        {
+          "name": "Update Level",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Intermediate (Updated)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/levels/{{level_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["levels", "{{level_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Level",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/levels/{{level_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["levels", "{{level_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Courses",
+      "item": [
+        {
+          "name": "Get All Courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses"]
+            }
+          }
+        },
+        {
+          "name": "Get Course by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Course by Slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/slug/{{slug}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "slug", "{{slug}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Courses by Mentor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/mentor/{{mentor_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "mentor", "{{mentor_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Courses by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/category/{{category_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "category", "{{category_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Courses by Level",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/level/{{level_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "level", "{{level_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Course",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "mentor_id", "value": "{{mentor_id}}", "type": "text" },
+                { "key": "category_id", "value": "{{category_id}}", "type": "text" },
+                { "key": "level_id", "value": "{{level_id}}", "type": "text" },
+                { "key": "title", "value": "Contoh Course", "type": "text" },
+                { "key": "description", "value": "Deskripsi course", "type": "text" },
+                { "key": "price", "value": "150000", "type": "text" },
+                { "key": "duration", "value": "12", "type": "text" },
+                { "key": "status", "value": "draft", "type": "text" },
+                { "key": "thumbnail", "type": "file", "src": [] }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses"]
+            }
+          }
+        },
+        {
+          "name": "Update Course",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Contoh Course (Updated)", "type": "text" },
+                { "key": "description", "value": "Deskripsi diperbarui", "type": "text" },
+                { "key": "price", "value": "200000", "type": "text" },
+                { "key": "level_id", "value": "{{level_id}}", "type": "text" },
+                { "key": "duration", "value": "15", "type": "text" },
+                { "key": "status", "value": "published", "type": "text" },
+                { "key": "thumbnail", "type": "file", "src": [] }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Course Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/courses/slug/{{slug}}/status?status=published",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "slug", "{{slug}}", "status"],
+              "query": [{ "key": "status", "value": "published" }]
+            }
+          }
+        },
+        {
+          "name": "Delete Course",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Course Sections",
+      "item": [
+        {
+          "name": "Get Sections by Course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections"]
+            }
+          }
+        },
+        {
+          "name": "Create Section",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Pengenalan\",\n  \"order_number\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections"]
+            }
+          }
+        },
+        {
+          "name": "Get Section by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Section",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Pengenalan (Updated)\",\n  \"order_number\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Section",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lessons",
+      "item": [
+        {
+          "name": "Get Lessons by Section",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons"]
+            }
+          }
+        },
+        {
+          "name": "Create Lesson",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Apa itu Golang\",\n  \"description\": \"Mengenal bahasa Go\",\n  \"video_url\": \"https://www.youtube.com/watch?v=demo1\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons"]
+            }
+          }
+        },
+        {
+          "name": "Get Lesson by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Lesson",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Apa itu Golang (Updated)\",\n  \"description\": \"Deskripsi diperbarui\",\n  \"video_url\": \"https://www.youtube.com/watch?v=demo1\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Lesson",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lesson Files",
+      "item": [
+        {
+          "name": "Get Files by Lesson",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/files",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "files"]
+            }
+          }
+        },
+        {
+          "name": "Upload Lesson File",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "file", "type": "file", "src": [] }]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/files",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "files"]
+            }
+          }
+        },
+        {
+          "name": "Get Lesson File by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/files/{{file_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "files", "{{file_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Lesson File",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/files/{{file_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "files", "{{file_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quizzes",
+      "item": [
+        {
+          "name": "Get Quizzes by Lesson",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/quizzes",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "quizzes"]
+            }
+          }
+        },
+        {
+          "name": "Create Quiz",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Kuis Dasar Golang\",\n  \"passing_score\": 60,\n  \"questions\": [\n    {\n      \"question\": \"Siapa penemu bahasa Go?\",\n      \"question_type\": \"multiple_choice\",\n      \"options\": [\n        { \"option_text\": \"Google\", \"is_correct\": true },\n        { \"option_text\": \"Microsoft\", \"is_correct\": false },\n        { \"option_text\": \"Facebook\", \"is_correct\": false }\n      ]\n    },\n    {\n      \"question\": \"Apakah Golang memiliki garbage collector?\",\n      \"question_type\": \"true_false\",\n      \"options\": [\n        { \"option_text\": \"True\", \"is_correct\": true },\n        { \"option_text\": \"False\", \"is_correct\": false }\n      ]\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/quizzes",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "quizzes"]
+            }
+          }
+        },
+        {
+          "name": "Get Quiz by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/quizzes/{{quiz_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "quizzes", "{{quiz_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Quiz",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Kuis Dasar Golang (Updated)\",\n  \"passing_score\": 70,\n  \"questions\": [\n    {\n      \"question\": \"Siapa penemu bahasa Go?\",\n      \"question_type\": \"multiple_choice\",\n      \"options\": [\n        { \"option_text\": \"Google\", \"is_correct\": true },\n        { \"option_text\": \"Microsoft\", \"is_correct\": false }\n      ]\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/quizzes/{{quiz_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "quizzes", "{{quiz_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Quiz",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/quizzes/{{quiz_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "quizzes", "{{quiz_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Assignments",
+      "item": [
+        {
+          "name": "Get Assignments by Lesson",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/assignments",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "assignments"]
+            }
+          }
+        },
+        {
+          "name": "Create Assignment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Latihan: Hello World\",\n  \"description\": \"Buat program mencetak Hello World\",\n  \"due_date\": \"2026-08-15T23:59:59Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/assignments",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "assignments"]
+            }
+          }
+        },
+        {
+          "name": "Get Assignment by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/assignments/{{assignment_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "assignments", "{{assignment_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Assignment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Latihan: Hello World (Updated)\",\n  \"description\": \"Deskripsi diperbarui\",\n  \"due_date\": \"2026-08-20T23:59:59Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/assignments/{{assignment_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "assignments", "{{assignment_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Assignment",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{course_id}}/sections/{{section_id}}/lessons/{{lesson_id}}/assignments/{{assignment_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{course_id}}", "sections", "{{section_id}}", "lessons", "{{lesson_id}}", "assignments", "{{assignment_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"John Doe Updated\",\n  \"email\": \"john@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{user_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/health",
+              "host": ["{{host}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
