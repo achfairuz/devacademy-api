@@ -65,3 +65,29 @@ func SeedUsers(db *gorm.DB) error {
 	log.Println("users seeded successfully")
 	return nil
 }
+
+func SeedLevels(db *gorm.DB) error {
+	levels := []models.Level{
+		{Name: "Beginner", Slug: "beginner"},
+		{Name: "Intermediate", Slug: "intermediate"},
+		{Name: "Advanced", Slug: "advanced"},
+	}
+
+	for _, level := range levels {
+		var existing models.Level
+		err := db.Where("slug = ?", level.Slug).First(&existing).Error
+		if err == nil {
+			continue
+		}
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+
+		if err := db.Create(&level).Error; err != nil {
+			return err
+		}
+	}
+
+	log.Println("levels seeded successfully")
+	return nil
+}

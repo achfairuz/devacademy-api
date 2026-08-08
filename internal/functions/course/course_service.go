@@ -23,7 +23,7 @@ type CourseService interface {
 	GetAll(ctx context.Context, page, pageSize int) ([]models.Course, error)
 	GetByMentor(ctx context.Context, mentorID uuid.UUID, page, pageSize int) ([]models.Course, error)
 	GetByCategory(ctx context.Context, categoryID uuid.UUID, page, pageSize int) ([]models.Course, error)
-	GetByLevel(ctx context.Context, level string, page, pageSize int) ([]models.Course, error)
+	GetByLevel(ctx context.Context, levelID uuid.UUID, page, pageSize int) ([]models.Course, error)
 	Update(ctx context.Context, id uuid.UUID, req *UpdateCourseRequest) (*models.Course, error)
 	UpdateStatus(ctx context.Context, slug string, status string) error
 	Delete(ctx context.Context, id uuid.UUID) error
@@ -45,12 +45,12 @@ func (s *courseService) Create(ctx context.Context, req *CreateCourseRequest) (*
 	course := &models.Course{
 		MentorID:    req.MentorID,
 		CategoryID:  req.CategoryID,
+		LevelID:     req.LevelID,
 		Title:       req.Title,
 		Slug:        utils.Slugify(req.Title),
 		Description: req.Description,
 		Thumbnail:   req.Thumbnail,
 		Price:       req.Price,
-		Level:       req.Level,
 		Duration:    req.Duration,
 		Status:      req.Status,
 	}
@@ -127,14 +127,14 @@ func (s *courseService) UpdateStatus(ctx context.Context, slug string, status st
 	return s.repo.UpdateStatus(ctx, slug, status)
 }
 
-func (s *courseService) GetByLevel(ctx context.Context, level string, page, pageSize int) ([]models.Course, error) {
+func (s *courseService) GetByLevel(ctx context.Context, levelID uuid.UUID, page, pageSize int) ([]models.Course, error) {
 	if page < 1 {
 		page = 1
 	}
 	if pageSize < 1 {
 		pageSize = 10
 	}
-	return s.repo.FindByLevel(ctx, level, pageSize, (page-1)*pageSize)
+	return s.repo.FindByLevel(ctx, levelID, pageSize, (page-1)*pageSize)
 }
 
 func (s *courseService) Update(ctx context.Context, id uuid.UUID, req *UpdateCourseRequest) (*models.Course, error) {
@@ -159,8 +159,8 @@ func (s *courseService) Update(ctx context.Context, id uuid.UUID, req *UpdateCou
 	if req.Price != 0 {
 		course.Price = req.Price
 	}
-	if req.Level != "" {
-		course.Level = req.Level
+	if req.LevelID != uuid.Nil {
+		course.LevelID = req.LevelID
 	}
 	if req.Duration != 0 {
 		course.Duration = req.Duration

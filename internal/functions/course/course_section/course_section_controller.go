@@ -28,14 +28,14 @@ func NewCourseSectionController(service CourseSectionService, courseService cour
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			course_id	path	string				true	"Course ID"
-//	@Param			request		body	CourseSectionDto	true	"Section payload"
-//	@Success		201			{object}	response.Response
-//	@Failure		400			{object}	response.Response
-//	@Failure		404			{object}	response.Response
-//	@Router			/courses/{course_id}/sections [post]
+//	@Param			id		path	string				true	"Course ID"
+//	@Param			request	body	CourseSectionDto	true	"Section payload"
+//	@Success		201		{object}	response.Response
+//	@Failure		400		{object}	response.Response
+//	@Failure		404		{object}	response.Response
+//	@Router			/courses/{id}/sections [post]
 func (ctr *CourseSectionController) Create(c *gin.Context) {
-	courseID, err := uuid.Parse(c.Param("course_id"))
+	courseID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid course id", err.Error())
 		return
@@ -67,13 +67,13 @@ func (ctr *CourseSectionController) Create(c *gin.Context) {
 //	@Description	Retrieve paginated list of sections for a course
 //	@Tags			Courses
 //	@Produce		json
-//	@Param			course_id	path	int	true	"Course ID"
+//	@Param			id			path	int	true	"Course ID"
 //	@Param			page		query	int	false	"Page number"
 //	@Param			page_size	query	int	false	"Items per page"
 //	@Success		200			{object}	response.Response
-//	@Router			/courses/{course_id}/sections [get]
+//	@Router			/courses/{id}/sections [get]
 func (ctr *CourseSectionController) GetByCourse(c *gin.Context) {
-	courseID, err := uuid.Parse(c.Param("course_id"))
+	courseID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid course id", err.Error())
 		return
@@ -97,12 +97,12 @@ func (ctr *CourseSectionController) GetByCourse(c *gin.Context) {
 //	@Description	Retrieve a single course section by UUID
 //	@Tags			Courses
 //	@Produce		json
-//	@Param			id	path	string	true	"Section ID"
-//	@Success		200	{object}	response.Response
-//	@Failure		404	{object}	response.Response
-//	@Router			/sections/{id} [get]
+//	@Param			section_id	path	string	true	"Section ID"
+//	@Success		200			{object}	response.Response
+//	@Failure		404			{object}	response.Response
+//	@Router			/courses/{id}/sections/{section_id} [get]
 func (ctr *CourseSectionController) GetByID(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
+	id, err := uuid.Parse(c.Param("section_id"))
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid id", err.Error())
 		return
@@ -125,14 +125,14 @@ func (ctr *CourseSectionController) GetByID(c *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			id		path	string				true	"Section ID"
-//	@Param			request	body	CourseSectionDto	true	"Section payload"
-//	@Success		200		{object}	response.Response
-//	@Failure		400		{object}	response.Response
-//	@Failure		404		{object}	response.Response
-//	@Router			/sections/{id} [put]
+//	@Param			section_id	path	string				true	"Section ID"
+//	@Param			request		body	CourseSectionDto	true	"Section payload"
+//	@Success		200			{object}	response.Response
+//	@Failure		400			{object}	response.Response
+//	@Failure		404			{object}	response.Response
+//	@Router			/courses/{id}/sections/{section_id} [put]
 func (ctr *CourseSectionController) Update(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
+	id, err := uuid.Parse(c.Param("section_id"))
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid id", err.Error())
 		return
@@ -160,13 +160,13 @@ func (ctr *CourseSectionController) Update(c *gin.Context) {
 //	@Tags			Courses
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			id	path	string	true	"Section ID"
-//	@Success		200	{object}	response.Response
-//	@Failure		400	{object}	response.Response
-//	@Failure		404	{object}	response.Response
-//	@Router			/sections/{id} [delete]
+//	@Param			section_id	path	string	true	"Section ID"
+//	@Success		200			{object}	response.Response
+//	@Failure		400			{object}	response.Response
+//	@Failure		404			{object}	response.Response
+//	@Router			/courses/{id}/sections/{section_id} [delete]
 func (ctr *CourseSectionController) Delete(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
+	id, err := uuid.Parse(c.Param("section_id"))
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid id", err.Error())
 		return

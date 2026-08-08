@@ -54,7 +54,7 @@ func saveThumbnail(c *gin.Context) (string, error) {
 //	@Param			description	formData	string	false	"Course description"
 //	@Param			thumbnail	formData	file	false	"Course thumbnail (jpg/jpeg/png/gif/webp/svg/avif, max 5MB)"
 //	@Param			price		formData	number	false	"Course price"
-//	@Param			level		formData	string	false	"Course level (beginner|intermediate|advanced)"
+//	@Param			level_id	formData	string	false	"Course level ID"
 //	@Param			duration	formData	int		false	"Course duration (hours)"
 //	@Param			status		formData	string	false	"Course status (draft|published)"
 //	@Success		201			{object}	response.Response
@@ -82,13 +82,15 @@ func (ctr *CourseController) Create(c *gin.Context) {
 	price, _ := strconv.ParseFloat(c.PostForm("price"), 64)
 	duration, _ := strconv.Atoi(c.PostForm("duration"))
 
+	levelID, _ := uuid.Parse(c.PostForm("level_id"))
+
 	req := &CreateCourseRequest{
 		MentorID:    mentorID,
 		CategoryID:  categoryID,
+		LevelID:     levelID,
 		Title:       title,
 		Description: c.PostForm("description"),
 		Price:       price,
-		Level:       c.PostForm("level"),
 		Duration:    duration,
 		Status:      c.PostForm("status"),
 	}
@@ -244,22 +246,22 @@ func (ctr *CourseController) GetByCategory(c *gin.Context) {
 //	@Description	Retrieve paginated list of courses by level
 //	@Tags			Courses
 //	@Produce		json
-//	@Param			level	query	string	true	"Course level (beginner|intermediate|advanced)"
-//	@Param			page	query	int		false	"Page number"
-//	@Param			page_size	query	int	false	"Items per page"
-//	@Success		200		{object}	response.Response
-//	@Router			/courses/level [get]
+//	@Param			level_id	path	string	true	"Level ID"
+//	@Param			page		query	int		false	"Page number"
+//	@Param			page_size	query	int		false	"Items per page"
+//	@Success		200			{object}	response.Response
+//	@Router			/courses/level/{level_id} [get]
 func (ctr *CourseController) GetByLevel(c *gin.Context) {
-	level := c.Query("level")
-	if level == "" {
-		response.Error(c, http.StatusBadRequest, "invalid request", "level is required")
+	levelID, err := uuid.Parse(c.Param("level_id"))
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "invalid level id", err.Error())
 		return
 	}
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
-	courses, err := ctr.service.GetByLevel(c.Request.Context(), level, page, pageSize)
+	courses, err := ctr.service.GetByLevel(c.Request.Context(), levelID, page, pageSize)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "failed to get courses", err.Error())
 		return

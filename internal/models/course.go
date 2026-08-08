@@ -11,12 +11,12 @@ type Course struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
 	MentorID    uuid.UUID `gorm:"type:uuid;not null;index"`
 	CategoryID  uuid.UUID `gorm:"type:uuid;not null;index"`
+	LevelID     uuid.UUID `gorm:"type:uuid;index"`
 	Title       string    `gorm:"size:200;not null"`
 	Slug        string    `gorm:"size:200;uniqueIndex;not null"`
 	Description string    `gorm:"type:text"`
 	Thumbnail   string    `gorm:"type:text"`
 	Price       float64   `gorm:"type:decimal(12,2);not null;default:0"`
-	Level       string    `gorm:"size:20"`
 	Duration    int
 	Status      string `gorm:"size:20;not null;default:draft"`
 	CreatedAt   time.Time
@@ -24,6 +24,7 @@ type Course struct {
 
 	Mentor   User            `gorm:"foreignKey:MentorID"`
 	Category Category        `gorm:"foreignKey:CategoryID"`
+	Level    Level           `gorm:"foreignKey:LevelID"`
 	Sections []CourseSection `gorm:"foreignKey:CourseID"`
 }
 

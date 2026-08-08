@@ -18,7 +18,7 @@ type CourseRepository interface {
 	FindByMentor(ctx context.Context, mentorID uuid.UUID, limit, offset int) ([]models.Course, error)
 	FindByCategory(ctx context.Context, categoryID uuid.UUID, limit, offset int) ([]models.Course, error)
 	FindAll(ctx context.Context, limit, offset int) ([]models.Course, error)
-	FindByLevel(ctx context.Context, level string, limit, offset int) ([]models.Course, error)
+	FindByLevel(ctx context.Context, levelID uuid.UUID, limit, offset int) ([]models.Course, error)
 	Update(ctx context.Context, course *models.Course) error
 	UpdateStatus(ctx context.Context, slug string, status string) error
 	Delete(ctx context.Context, id uuid.UUID) error
@@ -73,10 +73,10 @@ func (r *courseRepository) FindByCategory(ctx context.Context, categoryID uuid.U
 	return courses, nil
 }
 
-func (r *courseRepository) FindByLevel(ctx context.Context, level string, limit, offset int) ([]models.Course, error) {
+func (r *courseRepository) FindByLevel(ctx context.Context, levelID uuid.UUID, limit, offset int) ([]models.Course, error) {
 	var courses []models.Course
 	if err := r.db.WithContext(ctx).
-		Where("level = ?", level).
+		Where("level_id = ?", levelID).
 		Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).

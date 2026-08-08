@@ -29,6 +29,10 @@ func main() {
 		log.Fatalf("failed to seed users: %v", err)
 	}
 
+	if err := database.SeedLevels(app.DB); err != nil {
+		log.Fatalf("failed to seed levels: %v", err)
+	}
+
 	app.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	log.Printf("server running on port %s", cfg.Server.Port)

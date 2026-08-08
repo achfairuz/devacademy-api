@@ -36,6 +36,7 @@ func InitPostgres(cfg *config.Config) *gorm.DB {
 		if err := db.AutoMigrate(
 			&models.User{},
 			&models.Category{},
+			&models.Level{},
 			&models.Course{},
 			&models.CourseSection{},
 			&models.Lesson{},
