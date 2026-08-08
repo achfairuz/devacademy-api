@@ -33,6 +33,10 @@ func main() {
 		log.Fatalf("failed to seed levels: %v", err)
 	}
 
+	if err := database.SeedCourseContent(app.DB); err != nil {
+		log.Fatalf("failed to seed course content: %v", err)
+	}
+
 	app.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	log.Printf("server running on port %s", cfg.Server.Port)

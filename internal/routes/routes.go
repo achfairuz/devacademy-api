@@ -8,6 +8,7 @@ import (
 	"github.com/iyuz/devacademy-api/internal/functions/course"
 	"github.com/iyuz/devacademy-api/internal/functions/course/course_section"
 	"github.com/iyuz/devacademy-api/internal/functions/course/lessons"
+	"github.com/iyuz/devacademy-api/internal/functions/course/lessons/assignment"
 	"github.com/iyuz/devacademy-api/internal/functions/course/lessons/lesson_file"
 	"github.com/iyuz/devacademy-api/internal/functions/course/lessons/quiz"
 	"github.com/iyuz/devacademy-api/internal/functions/level"
@@ -24,6 +25,7 @@ type Controller struct {
 	Lesson        *lessons.LessonController
 	LessonFile    *lessonfile.LessonFileController
 	Quiz          *quiz.QuizController
+	Assignment    *assignment.AssignmentController
 	Level         *level.LevelController
 }
 
@@ -104,6 +106,15 @@ func SetupRouter(cfg *config.Config, ctr *Controller) *gin.Engine {
 						courseQuizzes.GET("/:quiz_id", ctr.Quiz.Show)
 						courseQuizzes.PUT("/:quiz_id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Quiz.Update)
 						courseQuizzes.DELETE("/:quiz_id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Quiz.Delete)
+					}
+
+					courseAssignments := courseLessons.Group("/:lesson_id/assignments")
+					{
+						courseAssignments.GET("", ctr.Assignment.Index)
+						courseAssignments.POST("", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Assignment.Store)
+						courseAssignments.GET("/:assignment_id", ctr.Assignment.Show)
+						courseAssignments.PUT("/:assignment_id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Assignment.Update)
+						courseAssignments.DELETE("/:assignment_id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Assignment.Delete)
 					}
 				}
 			}
