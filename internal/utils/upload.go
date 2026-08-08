@@ -22,6 +22,7 @@ var allowedImageExts = map[string]bool{
 var (
 	ErrFileTooLarge = errors.New("file exceeds maximum size")
 	ErrInvalidImage = errors.New("invalid image format")
+	ErrInvalidFile  = errors.New("invalid file")
 )
 
 func ValidateImageFile(header *multipart.FileHeader, maxSize int64) (string, error) {
@@ -88,4 +89,39 @@ func SaveUploadedImage(header *multipart.FileHeader, dir string, maxSize int64) 
 	}
 
 	return dst, nil
+}
+
+func SaveUploadedFile(header *multipart.FileHeader, dir string, maxSize int64) (string, error) {
+	if header == nil {
+		return "", ErrInvalidFile
+	}
+	if header.Size > maxSize {
+		return "", ErrFileTooLarge
+	}
+
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return "", err
+	}
+
+	ext := strings.ToLower(filepath.Ext(header.Filename))
+	filename := fmt.Sprintf("%s-%d%s", uuid.NewString(), time.Now().UnixMilli(), ext)
+	dst := filepath.Join(dir, filename)
+
+	src, err := header.Open()
+	if err != nil {
+		return "", err
+	}
+	defer src.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return "", err
+	}
+	defer out.Close()
+
+	if _, err := io.Copy(out, src); err != nil {
+		return "", err
+	}
+
+	return filename, nil
 }

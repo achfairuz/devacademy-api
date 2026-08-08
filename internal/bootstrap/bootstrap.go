@@ -11,6 +11,7 @@ import (
 	"github.com/iyuz/devacademy-api/internal/functions/course"
 	"github.com/iyuz/devacademy-api/internal/functions/course/course_section"
 	"github.com/iyuz/devacademy-api/internal/functions/course/lessons"
+	"github.com/iyuz/devacademy-api/internal/functions/course/lessons/lesson_file"
 	"github.com/iyuz/devacademy-api/internal/functions/level"
 	"github.com/iyuz/devacademy-api/internal/functions/user"
 	"github.com/iyuz/devacademy-api/internal/routes"
@@ -41,6 +42,9 @@ func Init(cfg *config.Config) *App {
 	lessonService := lessons.NewLessonService(lessons.NewLessonRepository(db))
 	lessonController := lessons.NewLessonController(lessonService, courseSectionService)
 
+	lessonFileService := lessonfile.NewLessonFileService(lessonfile.NewLessonFileRepository(db))
+	lessonFileController := lessonfile.NewLessonFileController(lessonFileService, lessonService)
+
 	levelService := level.NewLevelService(level.NewLevelRepository(db))
 	levelController := level.NewLevelController(levelService)
 
@@ -50,6 +54,7 @@ func Init(cfg *config.Config) *App {
 		Course:        courseController,
 		CourseSection: courseSectionController,
 		Lesson:        lessonController,
+		LessonFile:    lessonFileController,
 		Level:         levelController,
 	})
 

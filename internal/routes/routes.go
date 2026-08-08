@@ -6,8 +6,9 @@ import (
 	"github.com/iyuz/devacademy-api/internal/config"
 	"github.com/iyuz/devacademy-api/internal/functions/category"
 	"github.com/iyuz/devacademy-api/internal/functions/course"
-	coursesection "github.com/iyuz/devacademy-api/internal/functions/course/course_section"
+	"github.com/iyuz/devacademy-api/internal/functions/course/course_section"
 	"github.com/iyuz/devacademy-api/internal/functions/course/lessons"
+	"github.com/iyuz/devacademy-api/internal/functions/course/lessons/lesson_file"
 	"github.com/iyuz/devacademy-api/internal/functions/level"
 	"github.com/iyuz/devacademy-api/internal/functions/user"
 	"github.com/iyuz/devacademy-api/internal/middleware"
@@ -20,6 +21,7 @@ type Controller struct {
 	Course        *course.CourseController
 	CourseSection *coursesection.CourseSectionController
 	Lesson        *lessons.LessonController
+	LessonFile    *lessonfile.LessonFileController
 	Level         *level.LevelController
 }
 
@@ -84,6 +86,14 @@ func SetupRouter(cfg *config.Config, ctr *Controller) *gin.Engine {
 					courseLessons.GET("/:lesson_id", ctr.Lesson.Show)
 					courseLessons.PUT("/:lesson_id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Lesson.Update)
 					courseLessons.DELETE("/:lesson_id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Lesson.Delete)
+
+					courseFiles := courseLessons.Group("/:lesson_id/files")
+					{
+						courseFiles.GET("", ctr.LessonFile.Index)
+						courseFiles.POST("", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.LessonFile.Store)
+						courseFiles.GET("/:file_id", ctr.LessonFile.Show)
+						courseFiles.DELETE("/:file_id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.LessonFile.Delete)
+					}
 				}
 			}
 		}
