@@ -19,6 +19,7 @@ type CourseRepository interface {
 	FindByCategory(ctx context.Context, categoryID uuid.UUID, limit, offset int) ([]models.Course, error)
 	FindAll(ctx context.Context, limit, offset int) ([]models.Course, error)
 	FindByLevel(ctx context.Context, levelID uuid.UUID, limit, offset int) ([]models.Course, error)
+	FindDetailBySlug(ctx context.Context, slug string) (*models.Course, error)
 	Update(ctx context.Context, course *models.Course) error
 	UpdateStatus(ctx context.Context, slug string, status string) error
 	Delete(ctx context.Context, id uuid.UUID) error
@@ -39,6 +40,27 @@ func NewCourseRepository(db *gorm.DB) CourseRepository {
 func (r *courseRepository) FindBySlug(ctx context.Context, slug string) (*models.Course, error) {
 	var course models.Course
 	if err := r.db.WithContext(ctx).Where("slug = ?", slug).First(&course).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &course, nil
+}
+func (r *courseRepository) FindDetailBySlug(ctx context.Context, slug string) (*models.Course, error) {
+	var course models.Course
+	if err := r.db.WithContext(ctx).
+		Preload("Sections", func(db *gorm.DB) *gorm.DB {
+			return db.Order("order_number ASC")
+		}).
+		Preload("Sections.Lessons", func(db *gorm.DB) *gorm.DB {
+			return db.Order("order_number ASC")
+		}).
+		Preload("Sections.Lessons.Files").
+		Preload("Sections.Lessons.Quiz.Questions.Options").
+		Preload("Sections.Lessons.Assignment").
+		Where("slug = ?", slug).
+		First(&course).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}

@@ -270,6 +270,30 @@ func (ctr *CourseController) GetByLevel(c *gin.Context) {
 	response.Success(c, "courses retrieved", courses)
 }
 
+// GetDetailBySlug godoc
+//
+//	@Summary		Get course detail by slug
+//	@Description	Retrieve a single course with all its sections and lessons by slug
+//	@Tags			Courses
+//	@Produce		json
+//	@Param			slug	path	string	true	"Course slug"
+//	@Success		200		{object}	response.Response
+//	@Failure		404		{object}	response.Response
+//	@Router			/courses/slug/{slug}/detail [get]
+func (ctr *CourseController) GetDetailBySlug(c *gin.Context) {
+	slug := c.Param("slug")
+	course, err := ctr.service.GetDetailBySlug(c.Request.Context(), slug)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "failed to get course", err.Error())
+		return
+	}
+	if course == nil {
+		response.Error(c, http.StatusNotFound, "course not found", "")
+		return
+	}
+	response.Success(c, "course retrieved", course)
+}
+
 // Update godoc
 //
 //	@Summary		Update course

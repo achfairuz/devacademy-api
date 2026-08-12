@@ -6,10 +6,10 @@ import (
 	"github.com/iyuz/devacademy-api/internal/config"
 	"github.com/iyuz/devacademy-api/internal/functions/category"
 	"github.com/iyuz/devacademy-api/internal/functions/course"
-	"github.com/iyuz/devacademy-api/internal/functions/course/course_section"
+	coursesection "github.com/iyuz/devacademy-api/internal/functions/course/course_section"
 	"github.com/iyuz/devacademy-api/internal/functions/course/lessons"
 	"github.com/iyuz/devacademy-api/internal/functions/course/lessons/assignment"
-	"github.com/iyuz/devacademy-api/internal/functions/course/lessons/lesson_file"
+	lessonfile "github.com/iyuz/devacademy-api/internal/functions/course/lessons/lesson_file"
 	"github.com/iyuz/devacademy-api/internal/functions/course/lessons/quiz"
 	"github.com/iyuz/devacademy-api/internal/functions/level"
 	"github.com/iyuz/devacademy-api/internal/functions/user"
@@ -69,6 +69,8 @@ func SetupRouter(cfg *config.Config, ctr *Controller) *gin.Engine {
 			courses.GET("/mentor/:mentor_id", ctr.Course.GetByMentor)
 			courses.GET("/category/:category_id", ctr.Course.GetByCategory)
 			courses.GET("/level/:level_id", ctr.Course.GetByLevel)
+
+			courses.GET("/slug/:slug/detail", ctr.Course.GetDetailBySlug)
 
 			courses.POST("", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Course.Create)
 			courses.PUT("/:id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Course.Update)

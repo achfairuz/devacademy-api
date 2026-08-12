@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	ErrCourseNotFound = errors.New("course not found")
-	ErrSlugTaken      = errors.New("slug already exists")
+	ErrCourseNotFound          = errors.New("course not found")
+	ErrSlugTaken               = errors.New("slug already exists")
+	ErrLevelRequiredForPublish = errors.New("level_id is required before publishing")
 )
 
 type CourseService interface {
@@ -24,6 +25,7 @@ type CourseService interface {
 	GetByMentor(ctx context.Context, mentorID uuid.UUID, page, pageSize int) ([]models.Course, error)
 	GetByCategory(ctx context.Context, categoryID uuid.UUID, page, pageSize int) ([]models.Course, error)
 	GetByLevel(ctx context.Context, levelID uuid.UUID, page, pageSize int) ([]models.Course, error)
+	GetDetailBySlug(ctx context.Context, slug string) (*models.Course, error)
 	Update(ctx context.Context, id uuid.UUID, req *UpdateCourseRequest) (*models.Course, error)
 	UpdateStatus(ctx context.Context, slug string, status string) error
 	Delete(ctx context.Context, id uuid.UUID) error
@@ -55,6 +57,12 @@ func (s *courseService) Create(ctx context.Context, req *CreateCourseRequest) (*
 		Status:      req.Status,
 	}
 
+	if req.Status == "published" {
+		if err := validateForPublish(course); err != nil {
+			return nil, err
+		}
+	}
+
 	if err := s.repo.Create(ctx, course); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return nil, ErrSlugTaken
@@ -77,6 +85,17 @@ func (s *courseService) GetByID(ctx context.Context, id uuid.UUID) (*models.Cour
 
 func (s *courseService) GetBySlug(ctx context.Context, slug string) (*models.Course, error) {
 	course, err := s.repo.FindBySlug(ctx, slug)
+	if err != nil {
+		return nil, err
+	}
+	if course == nil {
+		return nil, ErrCourseNotFound
+	}
+	return course, nil
+}
+
+func (s *courseService) GetDetailBySlug(ctx context.Context, slug string) (*models.Course, error) {
+	course, err := s.repo.FindDetailBySlug(ctx, slug)
 	if err != nil {
 		return nil, err
 	}
@@ -124,6 +143,11 @@ func (s *courseService) UpdateStatus(ctx context.Context, slug string, status st
 	if course == nil {
 		return ErrCourseNotFound
 	}
+	if status == "published" {
+		if err := validateForPublish(course); err != nil {
+			return err
+		}
+	}
 	return s.repo.UpdateStatus(ctx, slug, status)
 }
 
@@ -169,6 +193,12 @@ func (s *courseService) Update(ctx context.Context, id uuid.UUID, req *UpdateCou
 		course.Status = req.Status
 	}
 
+	if course.Status == "published" {
+		if err := validateForPublish(course); err != nil {
+			return nil, err
+		}
+	}
+
 	if err := s.repo.Update(ctx, course); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return nil, ErrSlugTaken
@@ -187,4 +217,11 @@ func (s *courseService) Delete(ctx context.Context, id uuid.UUID) error {
 		return ErrCourseNotFound
 	}
 	return s.repo.Delete(ctx, id)
+}
+
+func validateForPublish(course *models.Course) error {
+	if course.LevelID == uuid.Nil {
+		return ErrLevelRequiredForPublish
+	}
+	return nil
 }

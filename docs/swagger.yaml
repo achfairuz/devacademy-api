@@ -1,6 +1,97 @@
 basePath: /api/v1
 definitions:
-  controllers.loginRequest:
+  github_com_iyuz_devacademy-api_pkg_response.Response:
+    properties:
+      data: {}
+      errors: {}
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  internal_functions_course_course_section.CourseSectionDto:
+    properties:
+      order_number:
+        type: integer
+      title:
+        type: string
+    required:
+    - title
+    type: object
+  internal_functions_course_lessons.LessonRequest:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+      video_url:
+        type: string
+    required:
+    - title
+    - video_url
+    type: object
+  internal_functions_course_lessons_assignment.AssignmentRequest:
+    properties:
+      description:
+        type: string
+      due_date:
+        type: string
+      title:
+        type: string
+    required:
+    - title
+    type: object
+  internal_functions_course_lessons_quiz.QuizOptionRequest:
+    properties:
+      is_correct:
+        type: boolean
+      option_text:
+        type: string
+    required:
+    - option_text
+    type: object
+  internal_functions_course_lessons_quiz.QuizQuestionRequest:
+    properties:
+      options:
+        items:
+          $ref: '#/definitions/internal_functions_course_lessons_quiz.QuizOptionRequest'
+        type: array
+      question:
+        type: string
+      question_type:
+        enum:
+        - multiple_choice
+        - true_false
+        type: string
+    required:
+    - question
+    type: object
+  internal_functions_course_lessons_quiz.QuizRequest:
+    properties:
+      passing_score:
+        type: integer
+      questions:
+        items:
+          $ref: '#/definitions/internal_functions_course_lessons_quiz.QuizQuestionRequest'
+        type: array
+      title:
+        type: string
+    required:
+    - title
+    type: object
+  internal_functions_level.CreateLevelRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  internal_functions_level.UpdateLevelRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  internal_functions_user.loginRequest:
     properties:
       email:
         type: string
@@ -10,7 +101,7 @@ definitions:
     - email
     - password
     type: object
-  controllers.registerRequest:
+  internal_functions_user.registerRequest:
     properties:
       email:
         type: string
@@ -27,21 +118,12 @@ definitions:
     - password
     - username
     type: object
-  controllers.updateRequest:
+  internal_functions_user.updateRequest:
     properties:
       email:
         type: string
       full_name:
         type: string
-    type: object
-  response.Response:
-    properties:
-      data: {}
-      errors: {}
-      message:
-        type: string
-      status:
-        type: integer
     type: object
 host: localhost:8080
 info:
@@ -61,22 +143,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/controllers.loginRequest'
+          $ref: '#/definitions/internal_functions_user.loginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
       summary: Login user
       tags:
       - Auth
@@ -91,22 +173,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/controllers.registerRequest'
+          $ref: '#/definitions/internal_functions_user.registerRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
       summary: Register a new user
       tags:
       - Auth
@@ -128,7 +210,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
       summary: List categories
       tags:
       - Categories
@@ -152,11 +234,11 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
       summary: Create a new category
       tags:
       - Categories
@@ -175,11 +257,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
       summary: Delete category
       tags:
       - Categories
@@ -197,14 +279,1410 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
       summary: Get category by ID
       tags:
       - Categories
+  /courses:
+    get:
+      description: Retrieve paginated list of courses
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: List courses
+      tags:
+      - Courses
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create course with optional thumbnail upload (multipart/form-data)
+      parameters:
+      - description: Mentor ID
+        in: formData
+        name: mentor_id
+        required: true
+        type: string
+      - description: Category ID
+        in: formData
+        name: category_id
+        required: true
+        type: string
+      - description: Course title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Course description
+        in: formData
+        name: description
+        type: string
+      - description: Course thumbnail (jpg/jpeg/png/gif/webp/svg/avif, max 5MB)
+        in: formData
+        name: thumbnail
+        type: file
+      - description: Course price
+        in: formData
+        name: price
+        type: number
+      - description: Course level ID
+        in: formData
+        name: level_id
+        type: string
+      - description: Course duration (hours)
+        in: formData
+        name: duration
+        type: integer
+      - description: Course status (draft|published)
+        in: formData
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Create a new course
+      tags:
+      - Courses
+  /courses/{id}:
+    delete:
+      description: Soft delete a course by ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Delete course
+      tags:
+      - Courses
+    get:
+      description: Retrieve a single course by UUID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Get course by ID
+      tags:
+      - Courses
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update course fields (multipart/form-data)
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Course title
+        in: formData
+        name: title
+        type: string
+      - description: Course description
+        in: formData
+        name: description
+        type: string
+      - description: Course thumbnail
+        in: formData
+        name: thumbnail
+        type: file
+      - description: Course price
+        in: formData
+        name: price
+        type: number
+      - description: Course level (beginner|intermediate|advanced)
+        in: formData
+        name: level
+        type: string
+      - description: Course duration (hours)
+        in: formData
+        name: duration
+        type: integer
+      - description: Course status (draft|published)
+        in: formData
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Update course
+      tags:
+      - Courses
+  /courses/{id}/sections:
+    get:
+      description: Retrieve paginated list of sections for a course
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: List course sections
+      tags:
+      - Courses
+    post:
+      consumes:
+      - application/json
+      description: Add a new section to a course, validating the course exists
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_functions_course_course_section.CourseSectionDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Create course section
+      tags:
+      - Courses
+  /courses/{id}/sections/{section_id}:
+    delete:
+      description: Delete a course section by ID
+      parameters:
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete course section
+      tags:
+      - Courses
+    get:
+      description: Retrieve a single course section by UUID
+      parameters:
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Get course section by ID
+      tags:
+      - Courses
+    put:
+      consumes:
+      - application/json
+      description: Update section title and/or order number
+      parameters:
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Section payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_functions_course_course_section.CourseSectionDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update course section
+      tags:
+      - Courses
+  /courses/{id}/sections/{section_id}/lessons:
+    get:
+      description: Retrieve list of lessons for a section
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: List lessons
+      tags:
+      - Courses
+    post:
+      consumes:
+      - application/json
+      description: Add a new lesson to a section, validating the section exists
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_functions_course_lessons.LessonRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Create lesson
+      tags:
+      - Courses
+  /courses/{id}/sections/{section_id}/lessons/{lesson_id}:
+    delete:
+      description: Delete a lesson by ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete lesson
+      tags:
+      - Courses
+    get:
+      description: Retrieve a single lesson by UUID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Get lesson by ID
+      tags:
+      - Courses
+    put:
+      consumes:
+      - application/json
+      description: Update lesson title, description and/or video url
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      - description: Lesson payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_functions_course_lessons.LessonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update lesson
+      tags:
+      - Courses
+  /courses/{id}/sections/{section_id}/lessons/{lesson_id}/assignments:
+    get:
+      description: Retrieve list of assignments for a lesson
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: List assignments
+      tags:
+      - Courses
+    post:
+      consumes:
+      - application/json
+      description: Create an assignment for a lesson, validating the lesson exists
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      - description: Assignment payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_functions_course_lessons_assignment.AssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Create assignment
+      tags:
+      - Courses
+  /courses/{id}/sections/{section_id}/lessons/{lesson_id}/assignments/{assignment_id}:
+    delete:
+      description: Delete an assignment by ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      - description: Assignment ID
+        in: path
+        name: assignment_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete assignment
+      tags:
+      - Courses
+    get:
+      description: Retrieve a single assignment by UUID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      - description: Assignment ID
+        in: path
+        name: assignment_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Get assignment by ID
+      tags:
+      - Courses
+    put:
+      consumes:
+      - application/json
+      description: Update assignment title, description and/or due date
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      - description: Assignment ID
+        in: path
+        name: assignment_id
+        required: true
+        type: string
+      - description: Assignment payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_functions_course_lessons_assignment.AssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update assignment
+      tags:
+      - Courses
+  /courses/{id}/sections/{section_id}/lessons/{lesson_id}/files:
+    get:
+      description: Retrieve list of files for a lesson
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: List lesson files
+      tags:
+      - Courses
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file (e.g. PDF, DOCX) to a lesson, validating the lesson
+        exists
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      - description: Lesson file (max 50MB)
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Upload lesson file
+      tags:
+      - Courses
+  /courses/{id}/sections/{section_id}/lessons/{lesson_id}/files/{file_id}:
+    delete:
+      description: Delete a lesson file by ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      - description: File ID
+        in: path
+        name: file_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete lesson file
+      tags:
+      - Courses
+    get:
+      description: Retrieve a single lesson file by UUID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      - description: File ID
+        in: path
+        name: file_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Get lesson file by ID
+      tags:
+      - Courses
+  /courses/{id}/sections/{section_id}/lessons/{lesson_id}/quizzes:
+    get:
+      description: Retrieve list of quizzes for a lesson
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: List quizzes
+      tags:
+      - Courses
+    post:
+      consumes:
+      - application/json
+      description: Create a quiz with questions and options for a lesson, validating
+        the lesson exists
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      - description: Quiz payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_functions_course_lessons_quiz.QuizRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Create quiz
+      tags:
+      - Courses
+  /courses/{id}/sections/{section_id}/lessons/{lesson_id}/quizzes/{quiz_id}:
+    delete:
+      description: Delete a quiz and its questions, options and attempts by ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      - description: Quiz ID
+        in: path
+        name: quiz_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete quiz
+      tags:
+      - Courses
+    get:
+      description: Retrieve a single quiz with questions and options by UUID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      - description: Quiz ID
+        in: path
+        name: quiz_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Get quiz by ID
+      tags:
+      - Courses
+    put:
+      consumes:
+      - application/json
+      description: Update quiz title, passing score, and replace its questions and
+        options
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: string
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      - description: Quiz ID
+        in: path
+        name: quiz_id
+        required: true
+        type: string
+      - description: Quiz payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_functions_course_lessons_quiz.QuizRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update quiz
+      tags:
+      - Courses
+  /courses/category/{category_id}:
+    get:
+      description: Retrieve paginated list of courses by category
+      parameters:
+      - description: Category ID
+        in: path
+        name: category_id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: List courses by category
+      tags:
+      - Courses
+  /courses/level/{level_id}:
+    get:
+      description: Retrieve paginated list of courses by level
+      parameters:
+      - description: Level ID
+        in: path
+        name: level_id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: List courses by level
+      tags:
+      - Courses
+  /courses/mentor/{mentor_id}:
+    get:
+      description: Retrieve paginated list of courses by mentor
+      parameters:
+      - description: Mentor ID
+        in: path
+        name: mentor_id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: List courses by mentor
+      tags:
+      - Courses
+  /courses/slug/{slug}:
+    get:
+      description: Retrieve a single course by slug
+      parameters:
+      - description: Course slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Get course by slug
+      tags:
+      - Courses
+  /courses/slug/{slug}/detail:
+    get:
+      description: Retrieve a single course with all its sections and lessons by slug
+      parameters:
+      - description: Course slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Get course detail by slug
+      tags:
+      - Courses
+  /courses/slug/{slug}/status:
+    patch:
+      description: Update course status by slug (draft|published)
+      parameters:
+      - description: Course slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: Course status (draft|published)
+        in: query
+        name: status
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Update course status
+      tags:
+      - Courses
+  /levels:
+    get:
+      description: Retrieve paginated list of levels
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: List levels
+      tags:
+      - Levels
+    post:
+      consumes:
+      - application/json
+      description: Create a course level
+      parameters:
+      - description: Level payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_functions_level.CreateLevelRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new level
+      tags:
+      - Levels
+  /levels/{id}:
+    delete:
+      description: Delete a level by ID
+      parameters:
+      - description: Level ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete level
+      tags:
+      - Levels
+    get:
+      description: Retrieve a single level by UUID
+      parameters:
+      - description: Level ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      summary: Get level by ID
+      tags:
+      - Levels
+    put:
+      consumes:
+      - application/json
+      description: Update a level name
+      parameters:
+      - description: Level ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Level payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_functions_level.UpdateLevelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update level
+      tags:
+      - Levels
   /users:
     get:
       description: Retrieve paginated list of users
@@ -223,11 +1701,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
       security:
       - BearerAuth: []
       summary: List all users
@@ -248,19 +1726,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
       security:
       - BearerAuth: []
       summary: Delete user
@@ -280,19 +1758,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
       security:
       - BearerAuth: []
       summary: Get user by ID
@@ -313,22 +1791,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/controllers.updateRequest'
+          $ref: '#/definitions/internal_functions_user.updateRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
       security:
       - BearerAuth: []
       summary: Update user
