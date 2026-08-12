@@ -25,7 +25,7 @@ type CourseService interface {
 	GetByMentor(ctx context.Context, mentorID uuid.UUID, page, pageSize int) ([]models.Course, error)
 	GetByCategory(ctx context.Context, categoryID uuid.UUID, page, pageSize int) ([]models.Course, error)
 	GetByLevel(ctx context.Context, levelID uuid.UUID, page, pageSize int) ([]models.Course, error)
-	GetDetailBySlug(ctx context.Context, slug string) (*models.Course, error)
+	GetDetailBySlug(ctx context.Context, slug string) (*CourseDetail, error)
 	Update(ctx context.Context, id uuid.UUID, req *UpdateCourseRequest) (*models.Course, error)
 	UpdateStatus(ctx context.Context, slug string, status string) error
 	Delete(ctx context.Context, id uuid.UUID) error
@@ -94,7 +94,7 @@ func (s *courseService) GetBySlug(ctx context.Context, slug string) (*models.Cou
 	return course, nil
 }
 
-func (s *courseService) GetDetailBySlug(ctx context.Context, slug string) (*models.Course, error) {
+func (s *courseService) GetDetailBySlug(ctx context.Context, slug string) (*CourseDetail, error) {
 	course, err := s.repo.FindDetailBySlug(ctx, slug)
 	if err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func (s *courseService) GetDetailBySlug(ctx context.Context, slug string) (*mode
 	if course == nil {
 		return nil, ErrCourseNotFound
 	}
-	return course, nil
+	return toCourseDetail(course), nil
 }
 
 func (s *courseService) GetAll(ctx context.Context, page, pageSize int) ([]models.Course, error) {

@@ -277,7 +277,7 @@ func (ctr *CourseController) GetByLevel(c *gin.Context) {
 //	@Tags			Courses
 //	@Produce		json
 //	@Param			slug	path	string	true	"Course slug"
-//	@Success		200		{object}	response.Response
+//	@Success		200		{object}	response.Response{data=CourseDetail}
 //	@Failure		404		{object}	response.Response
 //	@Router			/courses/slug/{slug}/detail [get]
 func (ctr *CourseController) GetDetailBySlug(c *gin.Context) {

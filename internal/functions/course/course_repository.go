@@ -50,6 +50,9 @@ func (r *courseRepository) FindBySlug(ctx context.Context, slug string) (*models
 func (r *courseRepository) FindDetailBySlug(ctx context.Context, slug string) (*models.Course, error) {
 	var course models.Course
 	if err := r.db.WithContext(ctx).
+		Preload("Mentor").
+		Preload("Category").
+		Preload("Level").
 		Preload("Sections", func(db *gorm.DB) *gorm.DB {
 			return db.Order("order_number ASC")
 		}).

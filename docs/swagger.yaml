@@ -9,6 +9,177 @@ definitions:
       status:
         type: integer
     type: object
+  internal_functions_course.AssignmentDetail:
+    properties:
+      description:
+        type: string
+      due_date:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+    type: object
+  internal_functions_course.CategorySummary:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      slug:
+        type: string
+    type: object
+  internal_functions_course.CourseDetail:
+    properties:
+      category:
+        $ref: '#/definitions/internal_functions_course.CategorySummary'
+      category_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      duration:
+        type: integer
+      id:
+        type: string
+      level:
+        $ref: '#/definitions/internal_functions_course.LevelSummary'
+      level_id:
+        type: string
+      mentor:
+        $ref: '#/definitions/internal_functions_course.UserSummary'
+      mentor_id:
+        type: string
+      price:
+        type: number
+      sections:
+        items:
+          $ref: '#/definitions/internal_functions_course.SectionDetail'
+        type: array
+      slug:
+        type: string
+      status:
+        type: string
+      thumbnail:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  internal_functions_course.LessonDetail:
+    properties:
+      assignment:
+        $ref: '#/definitions/internal_functions_course.AssignmentDetail'
+      description:
+        type: string
+      duration:
+        type: integer
+      files:
+        items:
+          $ref: '#/definitions/internal_functions_course.LessonFileDetail'
+        type: array
+      id:
+        type: string
+      is_preview:
+        type: boolean
+      order_number:
+        type: integer
+      quiz:
+        $ref: '#/definitions/internal_functions_course.QuizDetail'
+      section_id:
+        type: string
+      title:
+        type: string
+      video_url:
+        type: string
+    type: object
+  internal_functions_course.LessonFileDetail:
+    properties:
+      file_name:
+        type: string
+      file_size:
+        type: integer
+      file_url:
+        type: string
+      id:
+        type: string
+    type: object
+  internal_functions_course.LevelSummary:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      slug:
+        type: string
+    type: object
+  internal_functions_course.QuizDetail:
+    properties:
+      id:
+        type: string
+      passing_score:
+        type: integer
+      questions:
+        items:
+          $ref: '#/definitions/internal_functions_course.QuizQuestionDetail'
+        type: array
+      title:
+        type: string
+    type: object
+  internal_functions_course.QuizOptionDetail:
+    properties:
+      id:
+        type: string
+      option_text:
+        type: string
+    type: object
+  internal_functions_course.QuizQuestionDetail:
+    properties:
+      id:
+        type: string
+      options:
+        items:
+          $ref: '#/definitions/internal_functions_course.QuizOptionDetail'
+        type: array
+      question:
+        type: string
+      question_type:
+        type: string
+    type: object
+  internal_functions_course.SectionDetail:
+    properties:
+      course_id:
+        type: string
+      id:
+        type: string
+      lessons:
+        items:
+          $ref: '#/definitions/internal_functions_course.LessonDetail'
+        type: array
+      order_number:
+        type: integer
+      title:
+        type: string
+    type: object
+  internal_functions_course.UserSummary:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    type: object
   internal_functions_course_course_section.CourseSectionDto:
     properties:
       order_number:
@@ -1511,7 +1682,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+            allOf:
+            - $ref: '#/definitions/github_com_iyuz_devacademy-api_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/internal_functions_course.CourseDetail'
+              type: object
         "404":
           description: Not Found
           schema:
