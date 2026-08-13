@@ -252,6 +252,18 @@
           }
         },
         {
+          "name": "Get Course Detail by Slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/slug/{{slug}}/detail",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "slug", "{{slug}}", "detail"]
+            }
+          }
+        },
+        {
           "name": "Get Courses by Mentor",
           "request": {
             "method": "GET",
