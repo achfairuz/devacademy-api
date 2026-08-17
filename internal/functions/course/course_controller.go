@@ -204,6 +204,36 @@ func (ctr *CourseController) GetAll(c *gin.Context) {
 	response.Success(c, "courses retrieved", courses)
 }
 
+// GetCards godoc
+//
+//	@Summary		List course cards
+//	@Description	Retrieve paginated list of published courses as compact cards (optional JWT to include user progress)
+//	@Tags			Courses
+//	@Produce		json
+//	@Param			page		query	int	false	"Page number"
+//	@Param			page_size	query	int	false	"Items per page"
+//	@Success		200			{object}	response.Response{data=[]CourseCard}
+//	@Router			/courses/cards [get]
+func (ctr *CourseController) GetCards(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+
+	var userID *uuid.UUID
+	if raw, exists := c.Get("user_id"); exists {
+		if uid, ok := raw.(uuid.UUID); ok {
+			userID = &uid
+		}
+	}
+
+	cards, err := ctr.service.GetCards(c.Request.Context(), userID, page, pageSize)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "failed to get course cards", err.Error())
+		return
+	}
+
+	response.Success(c, "course cards retrieved", cards)
+}
+
 // GetByMentor godoc
 //
 //	@Summary		List courses by mentor

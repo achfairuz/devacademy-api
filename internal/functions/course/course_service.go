@@ -3,6 +3,7 @@ package course
 import (
 	"context"
 	"errors"
+	"math"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -26,6 +27,7 @@ type CourseService interface {
 	GetByCategory(ctx context.Context, categoryID uuid.UUID, page, pageSize int) ([]models.Course, error)
 	GetByLevel(ctx context.Context, levelID uuid.UUID, page, pageSize int) ([]models.Course, error)
 	GetDetailBySlug(ctx context.Context, slug string) (*CourseDetail, error)
+	GetCards(ctx context.Context, userID *uuid.UUID, page, pageSize int) ([]CourseCard, error)
 	Update(ctx context.Context, id uuid.UUID, req *UpdateCourseRequest) (*models.Course, error)
 	UpdateStatus(ctx context.Context, slug string, status string) error
 	Delete(ctx context.Context, id uuid.UUID) error
@@ -159,6 +161,57 @@ func (s *courseService) GetByLevel(ctx context.Context, levelID uuid.UUID, page,
 		pageSize = 10
 	}
 	return s.repo.FindByLevel(ctx, levelID, pageSize, (page-1)*pageSize)
+}
+
+func (s *courseService) GetCards(ctx context.Context, userID *uuid.UUID, page, pageSize int) ([]CourseCard, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+
+	courses, err := s.repo.FindCards(ctx, pageSize, (page-1)*pageSize)
+	if err != nil {
+		return nil, err
+	}
+	if len(courses) == 0 {
+		return []CourseCard{}, nil
+	}
+
+	courseIDs := make([]uuid.UUID, 0, len(courses))
+	for _, course := range courses {
+		courseIDs = append(courseIDs, course.ID)
+	}
+
+	enrollmentCounts, err := s.repo.CountEnrollments(ctx, courseIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	completedMap := make(map[uuid.UUID]int)
+	lessonCounts := make(map[uuid.UUID]int)
+	if userID != nil {
+		lessonCounts, err = s.repo.CountLessons(ctx, courseIDs)
+		if err != nil {
+			return nil, err
+		}
+		completedMap, err = s.repo.CountCompletedLessons(ctx, *userID, courseIDs)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	cards := make([]CourseCard, 0, len(courses))
+	for _, course := range courses {
+		totalBought := enrollmentCounts[course.ID]
+		progress := 0
+		if userID != nil && lessonCounts[course.ID] > 0 {
+			progress = int(math.Round(float64(completedMap[course.ID]) / float64(lessonCounts[course.ID]) * 100))
+		}
+		cards = append(cards, *toCourseCard(&course, progress, totalBought))
+	}
+	return cards, nil
 }
 
 func (s *courseService) Update(ctx context.Context, id uuid.UUID, req *UpdateCourseRequest) (*models.Course, error) {

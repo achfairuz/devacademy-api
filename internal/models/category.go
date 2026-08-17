@@ -8,11 +8,11 @@ import (
 )
 
 type Category struct {
-	ID        uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	Name      string    `gorm:"size:100;not null"`
-	Slug      string    `gorm:"size:100;uniqueIndex;not null"`
-	Icon      string    `gorm:"type:text"`
-	CreatedAt time.Time
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	Name      string    `gorm:"size:100;not null" json:"name"`
+	Slug      string    `gorm:"size:100;uniqueIndex;not null" json:"slug"`
+	Icon      string    `gorm:"type:text" json:"icon"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (c *Category) BeforeCreate(tx *gorm.DB) error {

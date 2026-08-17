@@ -8,19 +8,19 @@ import (
 )
 
 type User struct {
-	ID            uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	FullName      string    `gorm:"column:full_name;size:100;not null;default:''"`
-	Username      string    `gorm:"size:100;uniqueIndex;not null"`
-	Email         string    `gorm:"size:100;uniqueIndex;not null"`
-	Password      string    `gorm:"size:255;not null"`
-	Phone         string    `gorm:"size:30"`
-	Avatar        string    `gorm:"type:text"`
-	Role          Role      `gorm:"type:varchar(20);not null;default:student;check:chk_users_role,role IN ('admin','mentor','student')"`
-	Status        bool      `gorm:"not null;default:true"`
-	EmailVerified bool      `gorm:"column:email_verified;not null;default:false"`
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	DeletedAt     gorm.DeletedAt `gorm:"index"`
+	ID            uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	FullName      string         `gorm:"column:full_name;size:100;not null;default:''" json:"full_name"`
+	Username      string         `gorm:"size:100;uniqueIndex;not null" json:"username"`
+	Email         string         `gorm:"size:100;uniqueIndex;not null" json:"email"`
+	Password      string         `gorm:"size:255;not null" json:"-"`
+	Phone         string         `gorm:"size:30" json:"phone"`
+	Avatar        string         `gorm:"type:text" json:"avatar"`
+	Role          Role           `gorm:"type:varchar(20);not null;default:student;check:chk_users_role,role IN ('admin','mentor','student')" json:"role"`
+	Status        bool           `gorm:"not null;default:true" json:"status"`
+	EmailVerified bool           `gorm:"column:email_verified;not null;default:false" json:"email_verified"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {

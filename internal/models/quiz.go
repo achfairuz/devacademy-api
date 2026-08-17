@@ -8,14 +8,14 @@ import (
 )
 
 type Quiz struct {
-	ID           uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	LessonID     uuid.UUID `gorm:"type:uuid;not null;index"`
-	Title        string    `gorm:"size:200;not null"`
-	PassingScore int       `gorm:"column:passing_score;not null;default:0"`
+	ID           uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	LessonID     uuid.UUID `gorm:"type:uuid;not null;index" json:"lesson_id"`
+	Title        string    `gorm:"size:200;not null" json:"title"`
+	PassingScore int       `gorm:"column:passing_score;not null;default:0" json:"passing_score"`
 
-	Lesson    Lesson         `gorm:"foreignKey:LessonID"`
-	Questions []QuizQuestion `gorm:"foreignKey:QuizID"`
-	Attempts  []QuizAttempt  `gorm:"foreignKey:QuizID"`
+	Lesson    Lesson         `gorm:"foreignKey:LessonID" json:"lesson"`
+	Questions []QuizQuestion `gorm:"foreignKey:QuizID" json:"questions"`
+	Attempts  []QuizAttempt  `gorm:"foreignKey:QuizID" json:"attempts"`
 }
 
 func (q *Quiz) BeforeCreate(tx *gorm.DB) error {
@@ -26,13 +26,13 @@ func (q *Quiz) BeforeCreate(tx *gorm.DB) error {
 }
 
 type QuizQuestion struct {
-	ID           uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	QuizID       uuid.UUID `gorm:"type:uuid;not null;index"`
-	Question     string    `gorm:"type:text;not null"`
-	QuestionType string    `gorm:"column:question_type;size:20;not null;default:multiple_choice"`
+	ID           uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	QuizID       uuid.UUID `gorm:"type:uuid;not null;index" json:"quiz_id"`
+	Question     string    `gorm:"type:text;not null" json:"question"`
+	QuestionType string    `gorm:"column:question_type;size:20;not null;default:multiple_choice" json:"question_type"`
 
-	Quiz    Quiz         `gorm:"foreignKey:QuizID"`
-	Options []QuizOption `gorm:"foreignKey:QuestionID"`
+	Quiz    Quiz         `gorm:"foreignKey:QuizID" json:"quiz"`
+	Options []QuizOption `gorm:"foreignKey:QuestionID" json:"options"`
 }
 
 func (qq *QuizQuestion) BeforeCreate(tx *gorm.DB) error {
@@ -43,12 +43,12 @@ func (qq *QuizQuestion) BeforeCreate(tx *gorm.DB) error {
 }
 
 type QuizOption struct {
-	ID         uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	QuestionID uuid.UUID `gorm:"type:uuid;not null;index"`
-	OptionText string    `gorm:"column:option_text;type:text;not null"`
-	IsCorrect  bool      `gorm:"column:is_correct;not null;default:false"`
+	ID         uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	QuestionID uuid.UUID `gorm:"type:uuid;not null;index" json:"question_id"`
+	OptionText string    `gorm:"column:option_text;type:text;not null" json:"option_text"`
+	IsCorrect  bool      `gorm:"column:is_correct;not null;default:false" json:"is_correct"`
 
-	Question QuizQuestion `gorm:"foreignKey:QuestionID"`
+	Question QuizQuestion `gorm:"foreignKey:QuestionID" json:"question"`
 }
 
 func (qo *QuizOption) BeforeCreate(tx *gorm.DB) error {
@@ -59,16 +59,16 @@ func (qo *QuizOption) BeforeCreate(tx *gorm.DB) error {
 }
 
 type QuizAttempt struct {
-	ID         uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	QuizID     uuid.UUID `gorm:"type:uuid;not null;index"`
-	UserID     uuid.UUID `gorm:"type:uuid;not null;index"`
-	Score      int       `gorm:"not null;default:0"`
-	Status     string    `gorm:"size:20;not null;default:started"`
-	StartedAt  time.Time `gorm:"column:started_at;default:now()"`
-	FinishedAt *time.Time
+	ID         uuid.UUID  `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	QuizID     uuid.UUID  `gorm:"type:uuid;not null;index" json:"quiz_id"`
+	UserID     uuid.UUID  `gorm:"type:uuid;not null;index" json:"user_id"`
+	Score      int        `gorm:"not null;default:0" json:"score"`
+	Status     string     `gorm:"size:20;not null;default:started" json:"status"`
+	StartedAt  time.Time  `gorm:"column:started_at;default:now()" json:"started_at"`
+	FinishedAt *time.Time `json:"finished_at"`
 
-	Quiz Quiz `gorm:"foreignKey:QuizID"`
-	User User `gorm:"foreignKey:UserID"`
+	Quiz Quiz `gorm:"foreignKey:QuizID" json:"quiz"`
+	User User `gorm:"foreignKey:UserID" json:"user"`
 }
 
 func (qa *QuizAttempt) BeforeCreate(tx *gorm.DB) error {

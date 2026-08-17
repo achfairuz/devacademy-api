@@ -8,14 +8,14 @@ import (
 )
 
 type Assignment struct {
-	ID          uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	LessonID    uuid.UUID `gorm:"type:uuid;not null;index"`
-	Title       string    `gorm:"size:200;not null"`
-	Description string    `gorm:"type:text"`
-	DueDate     *time.Time
+	ID          uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	LessonID    uuid.UUID `gorm:"type:uuid;not null;index" json:"lesson_id"`
+	Title       string    `gorm:"size:200;not null" json:"title"`
+	Description string    `gorm:"type:text" json:"description"`
+	DueDate     *time.Time `json:"due_date"`
 
-	Lesson      Lesson                 `gorm:"foreignKey:LessonID"`
-	Submissions []AssignmentSubmission `gorm:"foreignKey:AssignmentID"`
+	Lesson      Lesson                 `gorm:"foreignKey:LessonID" json:"lesson"`
+	Submissions []AssignmentSubmission `gorm:"foreignKey:AssignmentID" json:"submissions"`
 }
 
 func (a *Assignment) BeforeCreate(tx *gorm.DB) error {
@@ -26,16 +26,16 @@ func (a *Assignment) BeforeCreate(tx *gorm.DB) error {
 }
 
 type AssignmentSubmission struct {
-	ID           uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	AssignmentID uuid.UUID `gorm:"type:uuid;not null;index"`
-	StudentID    uuid.UUID `gorm:"type:uuid;not null;index"`
-	FileURL      string    `gorm:"column:file_url;type:text;not null"`
-	Score        int
-	Feedback     string    `gorm:"type:text"`
-	SubmittedAt  time.Time `gorm:"column:submitted_at;default:now()"`
+	ID           uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	AssignmentID uuid.UUID `gorm:"type:uuid;not null;index" json:"assignment_id"`
+	StudentID    uuid.UUID `gorm:"type:uuid;not null;index" json:"student_id"`
+	FileURL      string    `gorm:"column:file_url;type:text;not null" json:"file_url"`
+	Score        int       `json:"score"`
+	Feedback     string    `gorm:"type:text" json:"feedback"`
+	SubmittedAt  time.Time `gorm:"column:submitted_at;default:now()" json:"submitted_at"`
 
-	Assignment Assignment `gorm:"foreignKey:AssignmentID"`
-	Student    User       `gorm:"foreignKey:StudentID"`
+	Assignment Assignment `gorm:"foreignKey:AssignmentID" json:"assignment"`
+	Student    User        `gorm:"foreignKey:StudentID" json:"student"`
 }
 
 func (as *AssignmentSubmission) BeforeCreate(tx *gorm.DB) error {

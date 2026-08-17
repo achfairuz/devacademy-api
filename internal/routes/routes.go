@@ -64,6 +64,7 @@ func SetupRouter(cfg *config.Config, ctr *Controller) *gin.Engine {
 		courses := api.Group("/courses")
 		{
 			courses.GET("", ctr.Course.GetAll)
+			courses.GET("/cards", middleware.OptionalAuth(cfg.JWT.Secret), ctr.Course.GetCards)
 			courses.GET("/:id", ctr.Course.GetByID)
 			courses.GET("/slug/:slug", ctr.Course.GetBySlug)
 			courses.GET("/mentor/:mentor_id", ctr.Course.GetByMentor)

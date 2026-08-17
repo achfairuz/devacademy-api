@@ -28,6 +28,23 @@ type CourseDetail struct {
 	Sections    []SectionDetail  `json:"sections"`
 }
 
+type CourseCard struct {
+	ID           uuid.UUID        `json:"id"`
+	Title        string           `json:"title"`
+	Slug         string           `json:"slug"`
+	Description  string           `json:"description"`
+	Thumbnail    string           `json:"thumbnail"`
+	Price        float64          `json:"price"`
+	Duration     int              `json:"duration"`
+	Level        *LevelSummary    `json:"level"`
+	Mentor       *UserSummary     `json:"mentor"`
+	Category     *CategorySummary `json:"category"`
+	TotalModules int              `json:"total_modules"`
+	Progress     int              `json:"progress"`
+	TotalBought  int              `json:"total_bought"`
+	TotalRated   int              `json:"total_rated"`
+}
+
 type UserSummary struct {
 	ID       uuid.UUID `json:"id"`
 	FullName string    `json:"full_name"`
@@ -124,6 +141,25 @@ func toCourseDetail(course *models.Course) *CourseDetail {
 		Category:    toCategorySummary(&course.Category),
 		Level:       toLevelSummary(&course.Level),
 		Sections:    toSectionDetails(course.Sections),
+	}
+}
+
+func toCourseCard(course *models.Course, progress, totalBought int) *CourseCard {
+	return &CourseCard{
+		ID:           course.ID,
+		Title:        course.Title,
+		Slug:         course.Slug,
+		Description:  course.Description,
+		Thumbnail:    course.Thumbnail,
+		Price:        course.Price,
+		Duration:     course.Duration,
+		Level:        toLevelSummary(&course.Level),
+		Mentor:       toUserSummary(&course.Mentor),
+		Category:     toCategorySummary(&course.Category),
+		TotalModules: len(course.Sections),
+		Progress:     progress,
+		TotalBought:  totalBought,
+		TotalRated:   0,
 	}
 }
 

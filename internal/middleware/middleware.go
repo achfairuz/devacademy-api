@@ -13,32 +13,48 @@ import (
 
 func Auth(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		header := c.GetHeader("Authorization")
-		if header == "" {
-			response.Error(c, http.StatusUnauthorized, "unauthorized", "missing authorization header")
+		claims := parseClaims(c, secret)
+		if claims == nil {
+			response.Error(c, http.StatusUnauthorized, "unauthorized", "missing or invalid authorization header")
 			c.Abort()
 			return
 		}
-
-		parts := strings.SplitN(header, " ", 2)
-		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
-			response.Error(c, http.StatusUnauthorized, "unauthorized", "invalid authorization header format")
-			c.Abort()
-			return
-		}
-
-		claims, err := utils.ParseToken(secret, parts[1])
-		if err != nil {
-			response.Error(c, http.StatusUnauthorized, "unauthorized", "invalid or expired token")
-			c.Abort()
-			return
-		}
-
-		c.Set("user_id", claims.UserID)
-		c.Set("email", claims.Email)
-		c.Set("role", claims.Role)
+		setUserContext(c, claims)
 		c.Next()
 	}
+}
+
+func OptionalAuth(secret string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if claims := parseClaims(c, secret); claims != nil {
+			setUserContext(c, claims)
+		}
+		c.Next()
+	}
+}
+
+func parseClaims(c *gin.Context, secret string) *utils.Claims {
+	header := c.GetHeader("Authorization")
+	if header == "" {
+		return nil
+	}
+
+	parts := strings.SplitN(header, " ", 2)
+	if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
+		return nil
+	}
+
+	claims, err := utils.ParseToken(secret, parts[1])
+	if err != nil {
+		return nil
+	}
+	return claims
+}
+
+func setUserContext(c *gin.Context, claims *utils.Claims) {
+	c.Set("user_id", claims.UserID)
+	c.Set("email", claims.Email)
+	c.Set("role", claims.Role)
 }
 
 func RequireRole(roles ...models.Role) gin.HandlerFunc {
