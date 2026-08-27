@@ -23,3 +23,9 @@ type UpdateCourseRequest struct {
 	Duration    int       `json:"duration" form:"duration"`
 	Status      string    `json:"status" form:"status" binding:"omitempty,oneof=draft published"`
 }
+
+type CardFilter struct {
+	Search       string `form:"search"`
+	CategorySlug string `form:"category"`
+	LevelSlug    string `form:"level"`
+}

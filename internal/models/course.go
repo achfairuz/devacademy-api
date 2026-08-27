@@ -41,7 +41,7 @@ type CourseSection struct {
 	Title       string    `gorm:"size:200;not null" json:"title"`
 	OrderNumber int       `gorm:"column:order_number;not null;default:1" json:"order_number"`
 
-	Course  Course   `gorm:"foreignKey:CourseID" json:"course"`
+	Course  Course   `gorm:"foreignKey:CourseID" json:"-"`
 	Lessons []Lesson `gorm:"foreignKey:SectionID" json:"lessons"`
 }
 
@@ -62,7 +62,7 @@ type Lesson struct {
 	OrderNumber int       `gorm:"column:order_number;not null;default:1" json:"order_number"`
 	IsPreview   bool      `gorm:"column:is_preview;not null;default:false" json:"is_preview"`
 
-	Section    CourseSection `gorm:"foreignKey:SectionID" json:"section"`
+	Section    CourseSection `gorm:"foreignKey:SectionID" json:"-"`
 	Files      []LessonFile  `gorm:"foreignKey:LessonID" json:"files"`
 	Quiz       *Quiz         `gorm:"foreignKey:LessonID" json:"quiz"`
 	Assignment *Assignment   `gorm:"foreignKey:LessonID" json:"assignment"`
@@ -82,7 +82,7 @@ type LessonFile struct {
 	FileURL  string    `gorm:"column:file_url;type:text;not null" json:"file_url"`
 	FileSize int       `gorm:"column:file_size" json:"file_size"`
 
-	Lesson Lesson `gorm:"foreignKey:LessonID" json:"lesson"`
+	Lesson Lesson `gorm:"foreignKey:LessonID" json:"-"`
 }
 
 func (lf *LessonFile) BeforeCreate(tx *gorm.DB) error {

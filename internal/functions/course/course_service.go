@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
+	lessonprogress "github.com/iyuz/devacademy-api/internal/functions/course/lessons/lesson_progress"
 	"github.com/iyuz/devacademy-api/internal/models"
 	"github.com/iyuz/devacademy-api/internal/utils"
 )
@@ -26,19 +27,20 @@ type CourseService interface {
 	GetByMentor(ctx context.Context, mentorID uuid.UUID, page, pageSize int) ([]models.Course, error)
 	GetByCategory(ctx context.Context, categoryID uuid.UUID, page, pageSize int) ([]models.Course, error)
 	GetByLevel(ctx context.Context, levelID uuid.UUID, page, pageSize int) ([]models.Course, error)
-	GetDetailBySlug(ctx context.Context, slug string) (*CourseDetail, error)
-	GetCards(ctx context.Context, userID *uuid.UUID, page, pageSize int) ([]CourseCard, error)
+	GetDetailBySlug(ctx context.Context, slug string, userID *uuid.UUID) (*CourseDetail, error)
+	GetCards(ctx context.Context, userID *uuid.UUID, page, pageSize int, filter CardFilter) ([]CourseCard, int64, error)
 	Update(ctx context.Context, id uuid.UUID, req *UpdateCourseRequest) (*models.Course, error)
 	UpdateStatus(ctx context.Context, slug string, status string) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type courseService struct {
-	repo CourseRepository
+	repo            CourseRepository
+	progressService lessonprogress.LessonProgressService
 }
 
-func NewCourseService(repo CourseRepository) CourseService {
-	return &courseService{repo: repo}
+func NewCourseService(repo CourseRepository, progressService lessonprogress.LessonProgressService) CourseService {
+	return &courseService{repo: repo, progressService: progressService}
 }
 
 func (s *courseService) Create(ctx context.Context, req *CreateCourseRequest) (*models.Course, error) {
@@ -85,18 +87,7 @@ func (s *courseService) GetByID(ctx context.Context, id uuid.UUID) (*models.Cour
 	return course, nil
 }
 
-func (s *courseService) GetBySlug(ctx context.Context, slug string) (*models.Course, error) {
-	course, err := s.repo.FindBySlug(ctx, slug)
-	if err != nil {
-		return nil, err
-	}
-	if course == nil {
-		return nil, ErrCourseNotFound
-	}
-	return course, nil
-}
-
-func (s *courseService) GetDetailBySlug(ctx context.Context, slug string) (*CourseDetail, error) {
+func (s *courseService) GetDetailBySlug(ctx context.Context, slug string, userID *uuid.UUID) (*CourseDetail, error) {
 	course, err := s.repo.FindDetailBySlug(ctx, slug)
 	if err != nil {
 		return nil, err
@@ -104,7 +95,26 @@ func (s *courseService) GetDetailBySlug(ctx context.Context, slug string) (*Cour
 	if course == nil {
 		return nil, ErrCourseNotFound
 	}
-	return toCourseDetail(course), nil
+	detail := toCourseDetail(course)
+
+	if userID != nil {
+		completedMap, err := s.progressService.CountCompletedBySection(ctx, *userID, course.ID)
+		if err != nil {
+			return nil, err
+		}
+		for _, section := range course.Sections {
+			totalLessons := len(section.Lessons)
+			completed := completedMap[section.ID]
+			detail.SectionProgress = append(detail.SectionProgress, SectionProgress{
+				SectionID:        section.ID,
+				Title:            section.Title,
+				TotalLessons:     totalLessons,
+				CompletedLessons: completed,
+			})
+		}
+	}
+
+	return detail, nil
 }
 
 func (s *courseService) GetAll(ctx context.Context, page, pageSize int) ([]models.Course, error) {
@@ -162,8 +172,18 @@ func (s *courseService) GetByLevel(ctx context.Context, levelID uuid.UUID, page,
 	}
 	return s.repo.FindByLevel(ctx, levelID, pageSize, (page-1)*pageSize)
 }
+func (s *courseService) GetBySlug(ctx context.Context, slug string) (*models.Course, error) {
+	course, err := s.repo.FindBySlug(ctx, slug)
+	if err != nil {
+		return nil, err
+	}
+	if course == nil {
+		return nil, ErrCourseNotFound
+	}
+	return course, nil
+}
 
-func (s *courseService) GetCards(ctx context.Context, userID *uuid.UUID, page, pageSize int) ([]CourseCard, error) {
+func (s *courseService) GetCards(ctx context.Context, userID *uuid.UUID, page, pageSize int, filter CardFilter) ([]CourseCard, int64, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -171,12 +191,17 @@ func (s *courseService) GetCards(ctx context.Context, userID *uuid.UUID, page, p
 		pageSize = 10
 	}
 
-	courses, err := s.repo.FindCards(ctx, pageSize, (page-1)*pageSize)
+	total, err := s.repo.CountCards(ctx, filter)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+
+	courses, err := s.repo.FindCards(ctx, filter, pageSize, (page-1)*pageSize)
+	if err != nil {
+		return nil, 0, err
 	}
 	if len(courses) == 0 {
-		return []CourseCard{}, nil
+		return []CourseCard{}, total, nil
 	}
 
 	courseIDs := make([]uuid.UUID, 0, len(courses))
@@ -186,7 +211,7 @@ func (s *courseService) GetCards(ctx context.Context, userID *uuid.UUID, page, p
 
 	enrollmentCounts, err := s.repo.CountEnrollments(ctx, courseIDs)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	completedMap := make(map[uuid.UUID]int)
@@ -194,11 +219,11 @@ func (s *courseService) GetCards(ctx context.Context, userID *uuid.UUID, page, p
 	if userID != nil {
 		lessonCounts, err = s.repo.CountLessons(ctx, courseIDs)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
-		completedMap, err = s.repo.CountCompletedLessons(ctx, *userID, courseIDs)
+		completedMap, err = s.progressService.CountCompletedByUser(ctx, *userID, courseIDs)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 	}
 
@@ -211,7 +236,7 @@ func (s *courseService) GetCards(ctx context.Context, userID *uuid.UUID, page, p
 		}
 		cards = append(cards, *toCourseCard(&course, progress, totalBought))
 	}
-	return cards, nil
+	return cards, total, nil
 }
 
 func (s *courseService) Update(ctx context.Context, id uuid.UUID, req *UpdateCourseRequest) (*models.Course, error) {

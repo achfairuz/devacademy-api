@@ -20,10 +20,10 @@ type CourseRepository interface {
 	FindAll(ctx context.Context, limit, offset int) ([]models.Course, error)
 	FindByLevel(ctx context.Context, levelID uuid.UUID, limit, offset int) ([]models.Course, error)
 	FindDetailBySlug(ctx context.Context, slug string) (*models.Course, error)
-	FindCards(ctx context.Context, limit, offset int) ([]models.Course, error)
+	FindCards(ctx context.Context, filter CardFilter, limit, offset int) ([]models.Course, error)
+	CountCards(ctx context.Context, filter CardFilter) (int64, error)
 	CountEnrollments(ctx context.Context, courseIDs []uuid.UUID) (map[uuid.UUID]int, error)
 	CountLessons(ctx context.Context, courseIDs []uuid.UUID) (map[uuid.UUID]int, error)
-	CountCompletedLessons(ctx context.Context, userID uuid.UUID, courseIDs []uuid.UUID) (map[uuid.UUID]int, error)
 	Update(ctx context.Context, course *models.Course) error
 	UpdateStatus(ctx context.Context, slug string, status string) error
 	Delete(ctx context.Context, id uuid.UUID) error
@@ -47,6 +47,15 @@ func (r *courseRepository) FindBySlug(ctx context.Context, slug string) (*models
 		Preload("Mentor").
 		Preload("Category").
 		Preload("Level").
+		Preload("Sections", func(db *gorm.DB) *gorm.DB {
+			return db.Order("order_number ASC")
+		}).
+		Preload("Sections.Lessons", func(db *gorm.DB) *gorm.DB {
+			return db.Order("order_number ASC")
+		}).
+		Preload("Sections.Lessons.Files").
+		Preload("Sections.Lessons.Quiz.Questions.Options").
+		Preload("Sections.Lessons.Assignment").
 		Where("slug = ?", slug).First(&course).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -80,21 +89,46 @@ func (r *courseRepository) FindByID(ctx context.Context, id uuid.UUID) (*models.
 	return &course, nil
 }
 
-func (r *courseRepository) FindCards(ctx context.Context, limit, offset int) ([]models.Course, error) {
+func (r *courseRepository) applyCardFilter(db *gorm.DB, filter CardFilter) *gorm.DB {
+	db = db.Where("courses.status = ?", "published")
+	if filter.Search != "" {
+		like := "%" + filter.Search + "%"
+		db = db.Where("courses.title ILIKE ? OR courses.description ILIKE ?", like, like)
+	}
+	if filter.CategorySlug != "" {
+		db = db.Joins("JOIN categories ON categories.id = courses.category_id").
+			Where("categories.slug = ?", filter.CategorySlug)
+	}
+	if filter.LevelSlug != "" {
+		db = db.Joins("JOIN levels ON levels.id = courses.level_id").
+			Where("levels.slug = ?", filter.LevelSlug)
+	}
+	return db
+}
+
+func (r *courseRepository) FindCards(ctx context.Context, filter CardFilter, limit, offset int) ([]models.Course, error) {
 	var courses []models.Course
-	if err := r.db.WithContext(ctx).
+	if err := r.applyCardFilter(r.db.WithContext(ctx).Model(&models.Course{}), filter).
 		Preload("Mentor").
 		Preload("Category").
 		Preload("Level").
 		Preload("Sections").
-		Where("status = ?", "published").
-		Order("created_at DESC").
+		Order("courses.created_at DESC").
 		Limit(limit).
 		Offset(offset).
 		Find(&courses).Error; err != nil {
 		return nil, err
 	}
 	return courses, nil
+}
+
+func (r *courseRepository) CountCards(ctx context.Context, filter CardFilter) (int64, error) {
+	var total int64
+	if err := r.applyCardFilter(r.db.WithContext(ctx).Model(&models.Course{}), filter).
+		Count(&total).Error; err != nil {
+		return 0, err
+	}
+	return total, nil
 }
 
 func (r *courseRepository) CountEnrollments(ctx context.Context, courseIDs []uuid.UUID) (map[uuid.UUID]int, error) {
@@ -137,34 +171,6 @@ func (r *courseRepository) CountLessons(ctx context.Context, courseIDs []uuid.UU
 		Select("cs.course_id, COUNT(*) AS total").
 		Joins("JOIN course_sections cs ON lessons.section_id = cs.id").
 		Where("cs.course_id IN ?", courseIDs).
-		Group("cs.course_id").
-		Scan(&rows).Error; err != nil {
-		return nil, err
-	}
-
-	for _, row := range rows {
-		result[row.CourseID] = row.Total
-	}
-	return result, nil
-}
-
-func (r *courseRepository) CountCompletedLessons(ctx context.Context, userID uuid.UUID, courseIDs []uuid.UUID) (map[uuid.UUID]int, error) {
-	result := make(map[uuid.UUID]int)
-	if len(courseIDs) == 0 {
-		return result, nil
-	}
-
-	var rows []struct {
-		CourseID uuid.UUID
-		Total    int
-	}
-	if err := r.db.WithContext(ctx).
-		Model(&models.LessonProgress{}).
-		Select("cs.course_id, COUNT(*) AS total").
-		Joins("JOIN enrollments e ON lesson_progress.enrollment_id = e.id").
-		Joins("JOIN lessons l ON lesson_progress.lesson_id = l.id").
-		Joins("JOIN course_sections cs ON l.section_id = cs.id").
-		Where("e.user_id = ? AND lesson_progress.is_completed = TRUE AND cs.course_id IN ?", userID, courseIDs).
 		Group("cs.course_id").
 		Scan(&rows).Error; err != nil {
 		return nil, err

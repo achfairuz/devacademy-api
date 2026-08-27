@@ -13,9 +13,9 @@ type Quiz struct {
 	Title        string    `gorm:"size:200;not null" json:"title"`
 	PassingScore int       `gorm:"column:passing_score;not null;default:0" json:"passing_score"`
 
-	Lesson    Lesson         `gorm:"foreignKey:LessonID" json:"lesson"`
+	Lesson    Lesson         `gorm:"foreignKey:LessonID" json:"-"`
 	Questions []QuizQuestion `gorm:"foreignKey:QuizID" json:"questions"`
-	Attempts  []QuizAttempt  `gorm:"foreignKey:QuizID" json:"attempts"`
+	Attempts  []QuizAttempt  `gorm:"foreignKey:QuizID" json:"-"`
 }
 
 func (q *Quiz) BeforeCreate(tx *gorm.DB) error {
@@ -31,7 +31,7 @@ type QuizQuestion struct {
 	Question     string    `gorm:"type:text;not null" json:"question"`
 	QuestionType string    `gorm:"column:question_type;size:20;not null;default:multiple_choice" json:"question_type"`
 
-	Quiz    Quiz         `gorm:"foreignKey:QuizID" json:"quiz"`
+	Quiz    Quiz         `gorm:"foreignKey:QuizID" json:"-"`
 	Options []QuizOption `gorm:"foreignKey:QuestionID" json:"options"`
 }
 
@@ -48,7 +48,7 @@ type QuizOption struct {
 	OptionText string    `gorm:"column:option_text;type:text;not null" json:"option_text"`
 	IsCorrect  bool      `gorm:"column:is_correct;not null;default:false" json:"is_correct"`
 
-	Question QuizQuestion `gorm:"foreignKey:QuestionID" json:"question"`
+	Question QuizQuestion `gorm:"foreignKey:QuestionID" json:"-"`
 }
 
 func (qo *QuizOption) BeforeCreate(tx *gorm.DB) error {

@@ -13,6 +13,7 @@ import (
 	"github.com/iyuz/devacademy-api/internal/functions/course/lessons"
 	"github.com/iyuz/devacademy-api/internal/functions/course/lessons/assignment"
 	"github.com/iyuz/devacademy-api/internal/functions/course/lessons/lesson_file"
+	"github.com/iyuz/devacademy-api/internal/functions/course/lessons/lesson_progress"
 	"github.com/iyuz/devacademy-api/internal/functions/course/lessons/quiz"
 	"github.com/iyuz/devacademy-api/internal/functions/level"
 	"github.com/iyuz/devacademy-api/internal/functions/user"
@@ -35,7 +36,9 @@ func Init(cfg *config.Config) *App {
 	categoryService := category.NewCategoryService(category.NewCategoryRepository(db))
 	categoryController := category.NewCategoryController(categoryService)
 
-	courseService := course.NewCourseService(course.NewCourseRepository(db))
+	lessonProgressService := lessonprogress.NewLessonProgressService(lessonprogress.NewLessonProgressRepository(db))
+
+	courseService := course.NewCourseService(course.NewCourseRepository(db), lessonProgressService)
 	courseController := course.NewCourseController(courseService)
 
 	courseSectionService := coursesection.NewCourseSectionService(coursesection.NewCourseSectionRepository(db))

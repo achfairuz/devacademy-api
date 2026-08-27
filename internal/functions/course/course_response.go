@@ -9,23 +9,31 @@ import (
 )
 
 type CourseDetail struct {
-	ID          uuid.UUID        `json:"id"`
-	MentorID    uuid.UUID        `json:"mentor_id"`
-	CategoryID  uuid.UUID        `json:"category_id"`
-	LevelID     uuid.UUID        `json:"level_id"`
-	Title       string           `json:"title"`
-	Slug        string           `json:"slug"`
-	Description string           `json:"description"`
-	Thumbnail   string           `json:"thumbnail"`
-	Price       float64          `json:"price"`
-	Duration    int              `json:"duration"`
-	Status      string           `json:"status"`
-	CreatedAt   time.Time        `json:"created_at"`
-	UpdatedAt   time.Time        `json:"updated_at"`
-	Mentor      *UserSummary     `json:"mentor"`
-	Category    *CategorySummary `json:"category"`
-	Level       *LevelSummary    `json:"level"`
-	Sections    []SectionDetail  `json:"sections"`
+	ID               uuid.UUID          `json:"id"`
+	MentorID         uuid.UUID          `json:"mentor_id"`
+	CategoryID       uuid.UUID          `json:"category_id"`
+	LevelID          uuid.UUID          `json:"level_id"`
+	Title            string             `json:"title"`
+	Slug             string             `json:"slug"`
+	Description      string             `json:"description"`
+	Thumbnail        string             `json:"thumbnail"`
+	Price            float64            `json:"price"`
+	Duration         int                `json:"duration"`
+	Status           string             `json:"status"`
+	CreatedAt        time.Time          `json:"created_at"`
+	UpdatedAt        time.Time          `json:"updated_at"`
+	Mentor           *UserSummary       `json:"mentor"`
+	Category         *CategorySummary   `json:"category"`
+	Level            *LevelSummary      `json:"level"`
+	Sections         []SectionDetail    `json:"sections"`
+	SectionProgress  []SectionProgress  `json:"section_progress,omitempty"`
+}
+
+type SectionProgress struct {
+	SectionID       uuid.UUID `json:"section_id"`
+	Title           string    `json:"title"`
+	TotalLessons    int       `json:"total_lessons"`
+	CompletedLessons int      `json:"completed_lessons"`
 }
 
 type CourseCard struct {
@@ -44,6 +52,8 @@ type CourseCard struct {
 	TotalBought  int              `json:"total_bought"`
 	TotalRated   int              `json:"total_rated"`
 }
+
+
 
 type UserSummary struct {
 	ID       uuid.UUID `json:"id"`

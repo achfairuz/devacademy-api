@@ -14,8 +14,8 @@ type Assignment struct {
 	Description string    `gorm:"type:text" json:"description"`
 	DueDate     *time.Time `json:"due_date"`
 
-	Lesson      Lesson                 `gorm:"foreignKey:LessonID" json:"lesson"`
-	Submissions []AssignmentSubmission `gorm:"foreignKey:AssignmentID" json:"submissions"`
+	Lesson      Lesson                 `gorm:"foreignKey:LessonID" json:"-"`
+	Submissions []AssignmentSubmission `gorm:"foreignKey:AssignmentID" json:"-"`
 }
 
 func (a *Assignment) BeforeCreate(tx *gorm.DB) error {

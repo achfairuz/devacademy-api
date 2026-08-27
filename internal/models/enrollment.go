@@ -14,8 +14,8 @@ type Enrollment struct {
 	EnrolledAt  time.Time `gorm:"column:enrolled_at;default:now()" json:"enrolled_at"`
 	CompletedAt *time.Time `json:"completed_at"`
 
-	User           User             `gorm:"foreignKey:UserID" json:"user"`
-	Course         Course           `gorm:"foreignKey:CourseID" json:"course"`
+	User           User             `gorm:"foreignKey:UserID" json:"-"`
+	Course         Course           `gorm:"foreignKey:CourseID" json:"-"`
 	LessonProgress []LessonProgress `gorm:"foreignKey:EnrollmentID" json:"lesson_progress"`
 }
 
@@ -34,8 +34,8 @@ type LessonProgress struct {
 	WatchedSecond int       `gorm:"column:watched_second;not null;default:0" json:"watched_second"`
 	UpdatedAt     time.Time `json:"updated_at"`
 
-	Enrollment Enrollment `gorm:"foreignKey:EnrollmentID" json:"enrollment"`
-	Lesson     Lesson     `gorm:"foreignKey:LessonID" json:"lesson"`
+	Enrollment Enrollment `gorm:"foreignKey:EnrollmentID" json:"-"`
+	Lesson     Lesson     `gorm:"foreignKey:LessonID" json:"-"`
 }
 
 func (lp *LessonProgress) BeforeCreate(tx *gorm.DB) error {

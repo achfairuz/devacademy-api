@@ -1,6 +1,7 @@
 package course
 
 import (
+	"math"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -149,7 +150,15 @@ func (ctr *CourseController) GetByID(c *gin.Context) {
 //	@Router			/courses/slug/{slug}/detail [get]
 func (ctr *CourseController) GetDetailBySlug(c *gin.Context) {
 	slug := c.Param("slug")
-	course, err := ctr.service.GetDetailBySlug(c.Request.Context(), slug)
+
+	var userID *uuid.UUID
+	if raw, exists := c.Get("user_id"); exists {
+		if uid, ok := raw.(uuid.UUID); ok {
+			userID = &uid
+		}
+	}
+
+	course, err := ctr.service.GetDetailBySlug(c.Request.Context(), slug, userID)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "failed to get course", err.Error())
 		return
@@ -210,13 +219,22 @@ func (ctr *CourseController) GetAll(c *gin.Context) {
 //	@Description	Retrieve paginated list of published courses as compact cards (optional JWT to include user progress)
 //	@Tags			Courses
 //	@Produce		json
-//	@Param			page		query	int	false	"Page number"
-//	@Param			page_size	query	int	false	"Items per page"
+//	@Param			page		query	int		false	"Page number"
+//	@Param			page_size	query	int		false	"Items per page"
+//	@Param			search		query	string	false	"Search by title or description"
+//	@Param			category	query	string	false	"Filter by category slug"
+//	@Param			level		query	string	false	"Filter by level slug"
 //	@Success		200			{object}	response.Response{data=[]CourseCard}
 //	@Router			/courses/cards [get]
 func (ctr *CourseController) GetCards(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+
+	var filter CardFilter
+	if err := c.ShouldBindQuery(&filter); err != nil {
+		response.Error(c, http.StatusBadRequest, "invalid query parameters", err.Error())
+		return
+	}
 
 	var userID *uuid.UUID
 	if raw, exists := c.Get("user_id"); exists {
@@ -225,13 +243,23 @@ func (ctr *CourseController) GetCards(c *gin.Context) {
 		}
 	}
 
-	cards, err := ctr.service.GetCards(c.Request.Context(), userID, page, pageSize)
+	cards, total, err := ctr.service.GetCards(c.Request.Context(), userID, page, pageSize, filter)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "failed to get course cards", err.Error())
 		return
 	}
 
-	response.Success(c, "course cards retrieved", cards)
+	totalPages := 0
+	if pageSize > 0 {
+		totalPages = int(math.Ceil(float64(total) / float64(pageSize)))
+	}
+
+	response.SuccessWithMeta(c, "course cards retrieved", cards, response.Meta{
+		Page:       page,
+		PageSize:   pageSize,
+		Total:      int(total),
+		TotalPages: totalPages,
+	})
 }
 
 // GetByMentor godoc

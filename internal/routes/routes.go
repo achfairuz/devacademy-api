@@ -71,7 +71,7 @@ func SetupRouter(cfg *config.Config, ctr *Controller) *gin.Engine {
 			courses.GET("/category/:category_id", ctr.Course.GetByCategory)
 			courses.GET("/level/:level_id", ctr.Course.GetByLevel)
 
-			courses.GET("/slug/:slug/detail", ctr.Course.GetDetailBySlug)
+			courses.GET("/slug/:slug/detail", middleware.OptionalAuth(cfg.JWT.Secret), ctr.Course.GetDetailBySlug)
 
 			courses.POST("", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Course.Create)
 			courses.PUT("/:id", middleware.Auth(cfg.JWT.Secret), middleware.RequireRole(models.RoleMentor, models.RoleAdmin), ctr.Course.Update)
